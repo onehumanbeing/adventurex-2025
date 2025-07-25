@@ -23,5 +23,8 @@
 		<key>UISceneConfigurations</key>
 		<dict/>
 	</dict>
+	<!-- 硅基流动API Key -->
+	<key>SiliconFlowAPIKey</key>
+	<string>sk-xdewqafvtfsqxhvovpidjvygplxwsfqrntovkvejdgtjzmgj</string>
 </dict>
 </plist>
