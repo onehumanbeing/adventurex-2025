@@ -15,7 +15,8 @@ struct HTMLWidgetView: View {
     
     // 将API返回的像素尺寸转换为SwiftUI的尺寸
     private var widgetSize: CGSize {
-        let scale: CGFloat = 0.3 // 增加缩放因子
+        // 放大3倍，让HTML Widget在真机上更清晰
+        let scale: CGFloat = 0.9 // 放大3倍
         return CGSize(
             width: CGFloat(width) * scale,
             height: CGFloat(height) * scale
@@ -43,6 +44,16 @@ struct WebView: UIViewRepresentable {
         webView.backgroundColor = UIColor.clear
         webView.scrollView.backgroundColor = UIColor.clear
         webView.scrollView.isScrollEnabled = false
+        
+        // 注入CSS来放大内容6倍（在3倍基础上再放大2倍）
+        let scriptSource = """
+        var style = document.createElement('style');
+        style.innerHTML = 'body { transform: scale(3); transform-origin: top left; }';
+        document.head.appendChild(style);
+        """
+        let userScript = WKUserScript(source: scriptSource, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
+        webView.configuration.userContentController.addUserScript(userScript)
+        
         return webView
     }
     

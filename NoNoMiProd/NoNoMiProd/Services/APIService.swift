@@ -47,7 +47,11 @@ class APIService: ObservableObject {
         
         print("APIService: 正在获取数据...")
         
-        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+        var request = URLRequest(url: url)
+        request.cachePolicy = .reloadIgnoringLocalAndRemoteCacheData
+        request.timeoutInterval = 10
+        
+        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
                 self?.isLoading = false
                 

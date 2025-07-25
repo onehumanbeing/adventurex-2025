@@ -51,6 +51,7 @@ def continuous_camera_capture(duration_sec=10, interval_sec=1):
 if __name__ == "__main__":
     SCREENSHOT_INTERVAL = int(os.environ.get("SCREENSHOT_INTERVAL", 1))
     USE_CAMERA = int(os.environ.get("USE_CAMERA", 0))
+    time.sleep(5)
     if USE_CAMERA == 1:
         continuous_camera_capture(duration_sec=10, interval_sec=SCREENSHOT_INTERVAL)
     else:

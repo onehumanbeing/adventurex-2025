@@ -60,8 +60,8 @@ def t2a_minimax(
 
 if __name__ == "__main__":
     import sys
-    text = sys.argv[1] if len(sys.argv) > 1 else "你好，这是Minimax语音合成测试。"
+    text = sys.argv[1] if len(sys.argv) > 1 else "Henry你好，诺诺米为您服务"
     audio = t2a_minimax(text)
-    with open("output_minimax.mp3", "wb") as f:
+    with open("hello.mp3", "wb") as f:
         f.write(audio)
-    print("音频已保存为 output_minimax.mp3")
+    print("音频已保存为 hello.mp3")

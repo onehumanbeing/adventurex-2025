@@ -27,7 +27,21 @@ def call_openai_api(messages):
     response = completion.choices[0].message.parsed
     return response
 
+def reset_status():
+    data = {
+        "voice": "https://helped-monthly-alpaca.ngrok-free.app/voice/hello.mp3",
+        "timestamp": int(time.time()),
+        "html": "<div style='height: 100%; width: 100%; padding: 16px; background-color: white; border-radius: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); color: #007aff;'><h2 style='font-size: 20px; font-weight: bold; margin-bottom: 8px;'>时尚提示</h2><p style='margin-bottom: 16px;'>您对这件衣服感兴趣，请确认价格以便购买！</p><div style='margin-top: 16px;'><button style='background-color: #007aff; color: white; padding: 10px 20px; border-radius: 12px; border: none; cursor: pointer;'>查询价格</button></div></div>",
+        "danmu_text": "QAQ",
+        "height": 400,
+        "width": 600
+    }
+    with open("cache/status.json", "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+
 def periodic_ai_task():
+    reset_status()
+    time.sleep(2)
     print("开始AI任务")
     AI_TIME_INTERVAL = int(os.environ.get("AI_TIME_INTERVAL", 5))
     SCREENSHOT_UPLOAD_AMOUNT = int(os.environ.get("SCREENSHOT_UPLOAD_AMOUNT", 1))
@@ -69,7 +83,7 @@ def periodic_ai_task():
         if os.path.exists(AUDIO_TXT_PATH):
             try:
                 with open(AUDIO_TXT_PATH, "r", encoding="utf-8") as f:
-                    audio_content = f.read().strip()
+                    audio_content = "audio:" + f.read().strip()
             except Exception as e:
                 print(f"读取audio.txt失败: {e}")
 
@@ -96,7 +110,8 @@ def periodic_ai_task():
             print("没有可用的输入，跳过本次调用。")
             time.sleep(AI_TIME_INTERVAL)
             continue
-
+        # INSERT_YOUR_CODE
+        print("本次处理的图片路径:", latest_images)
         # 5. 调用OpenAI
         try:
             result = call_openai_api(messages)
@@ -144,13 +159,13 @@ def periodic_ai_task():
                         os.remove(img_path)
                     except Exception as e:
                         print(f"删除图片失败: {img_path}, {e}")
-                # 清空audio.txt
-                if os.path.exists(AUDIO_TXT_PATH):
-                    try:
-                        with open(AUDIO_TXT_PATH, "w", encoding="utf-8") as f:
-                            f.write("")
-                    except Exception as e:
-                        print(f"删除audio.txt失败: {AUDIO_TXT_PATH}, {e}")
+            # 清空audio.txt
+            if os.path.exists(AUDIO_TXT_PATH):
+                try:
+                    with open(AUDIO_TXT_PATH, "w", encoding="utf-8") as f:
+                        f.write("")
+                except Exception as e:
+                    print(f"删除audio.txt失败: {AUDIO_TXT_PATH}, {e}")
         except Exception as e:
             print("调用OpenAI失败:", e)
             traceback.print_exc()

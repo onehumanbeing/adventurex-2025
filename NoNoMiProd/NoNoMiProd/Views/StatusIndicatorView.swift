@@ -14,12 +14,12 @@ struct StatusIndicatorView: View {
         HStack(spacing: 8) {
             // 连接状态指示器
             HStack(spacing: 4) {
-                Circle()
-                    .fill(apiService.error == nil ? Color.green : Color.red)
-                    .frame(width: 6, height: 6)
+                                    Circle()
+                        .fill(apiService.error == nil ? Color.green : Color.red)
+                        .frame(width: 18, height: 18)
                 
                 Text(apiService.error == nil ? "已连接" : "连接错误")
-                    .font(.system(size: 11, weight: .medium))
+                    .font(.system(size: 33, weight: .medium))
                     .foregroundColor(apiService.error == nil ? .green : .red)
                     .transition(.opacity.combined(with: .scale))
                     .animation(.easeInOut(duration: 0.3), value: apiService.error)
@@ -29,11 +29,11 @@ struct StatusIndicatorView: View {
             if apiService.isLoading {
                 HStack(spacing: 4) {
                     ProgressView()
-                        .scaleEffect(0.6)
-                        .frame(width: 12, height: 12)
+                        .scaleEffect(1.8)
+                        .frame(width: 36, height: 36)
                     
                     Text("更新中...")
-                        .font(.system(size: 11, weight: .medium))
+                        .font(.system(size: 33, weight: .medium))
                         .foregroundColor(.blue)
                 }
             }
