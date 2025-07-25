@@ -237,7 +237,7 @@ struct ContentView: View {
     private func isMockMode() -> Bool {
         // 简单的启发式检测：如果图像包含文本"Mock"则是Mock模式
         // 实际应用中可以通过更复杂的方式检测
-        return true // 暂时返回true，因为大多数情况下会是Mock模式
+        return false // 暂时返回true，因为大多数情况下会是Mock模式
     }
     
     // 截图预览（右上角）- 透明背景

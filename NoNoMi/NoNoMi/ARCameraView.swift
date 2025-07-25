@@ -49,7 +49,7 @@ struct ARCameraView: UIViewRepresentable {
         
         #if !os(iOS)
         // visionOS相机提供者
-        private var cameraProvider: AnyObject? // 可以是VisionOSCameraProvider或MockVisionOSCameraProvider
+        private var cameraProvider: VisionOSCameraProviderCompat?
         private var observationTask: Task<Void, Never>?
         private var cancellables: Set<AnyCancellable> = []
         #endif
@@ -69,63 +69,45 @@ struct ARCameraView: UIViewRepresentable {
         
         #if !os(iOS)
         private func setupVisionOSCamera() {
-            // 尝试使用真实的Enterprise Camera Provider
+            // 使用兼容性提供者，自动处理Enterprise API和Mock模式
             if #available(visionOS 1.0, *) {
-                // 检查是否支持CameraFrameProvider（需要Enterprise权限）
-                if CameraFrameProvider.isSupported {
-                    print("[ARCameraView] 使用Enterprise CameraFrameProvider")
-                    let provider = VisionOSCameraProvider()
-                    self.cameraProvider = provider
-                    
-                    // 观察相机帧更新
-                    observationTask = Task {
-                        await provider.startCameraCapture()
-                    }
-                    
-                    // 监听相机帧更新
-                    observeProviderUpdates(provider)
-                    
-                } else {
-                    print("[ARCameraView] CameraFrameProvider不支持，使用Mock Provider")
-                    setupMockCamera()
+                let provider = VisionOSCameraProviderCompat()
+                self.cameraProvider = provider
+                
+                // 启动相机捕获
+                observationTask = Task {
+                    await provider.startCameraCapture()
                 }
-            } else {
-                setupMockCamera()
+                
+                // 监听相机帧更新
+                observeProviderUpdates(provider)
             }
         }
         
-        private func setupMockCamera() {
-            let mockProvider = MockVisionOSCameraProvider()
-            self.cameraProvider = mockProvider
-            
-            observationTask = Task {
-                await mockProvider.startCameraCapture()
-            }
-            
-            observeMockProviderUpdates(mockProvider)
-        }
-        
-        private func observeProviderUpdates(_ provider: VisionOSCameraProvider) {
+        private func observeProviderUpdates(_ provider: VisionOSCameraProviderCompat) {
             // 使用Combine来观察相机帧更新
             provider.$latestCameraFrame
                 .compactMap { $0 }
                 .sink { [weak self] frame in
                     DispatchQueue.main.async {
-                        print("[ARCameraView] 收到Enterprise相机帧，尺寸: \(frame.size)")
+                        print("[ARCameraView] 收到visionOS相机帧，尺寸: \(frame.size)")
                         self?.parent.latestFrame = frame
                     }
                 }
                 .store(in: &cancellables)
-        }
-        
-        private func observeMockProviderUpdates(_ provider: MockVisionOSCameraProvider) {
-            provider.$latestCameraFrame
+            
+            // 观察错误状态
+            provider.$errorMessage
                 .compactMap { $0 }
-                .sink { [weak self] frame in
-                    DispatchQueue.main.async {
-                        print("[ARCameraView] 收到Mock相机帧，尺寸: \(frame.size)")
-                        self?.parent.latestFrame = frame
-                    }
+                .sink { error in
+                    print("[ARCameraView] visionOS相机错误: \(error)")
+                }
+                .store(in: &cancellables)
+            
+            // 观察活动状态
+            provider.$isActive
+                .sink { isActive in
+                    print("[ARCameraView] visionOS相机活动状态: \(isActive)")
                 }
                 .store(in: &cancellables)
         }
@@ -135,12 +117,7 @@ struct ARCameraView: UIViewRepresentable {
             #if !os(iOS)
             observationTask?.cancel()
             cancellables.removeAll()
-            
-            if let provider = cameraProvider as? VisionOSCameraProvider {
-                provider.stopCameraCapture()
-            } else if let mockProvider = cameraProvider as? MockVisionOSCameraProvider {
-                mockProvider.stopCameraCapture()
-            }
+            cameraProvider?.stopCameraCapture()
             #endif
         }
     }

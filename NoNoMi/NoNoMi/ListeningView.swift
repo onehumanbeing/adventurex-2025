@@ -45,6 +45,23 @@ class ListeningViewModel: NSObject, ObservableObject, AVAudioRecorderDelegate {
 
     private func requestMicPermissionAndStart() {
         print("[ListeningViewModel] requestMicPermissionAndStart called")
+        
+        #if os(visionOS)
+        // visionOS中使用现代化的权限请求方式
+        Task {
+            let granted = await AVAudioApplication.requestRecordPermission()
+            DispatchQueue.main.async {
+                print("[ListeningViewModel] AVAudioApplication.requestRecordPermission granted: \(granted)")
+                if granted {
+                    self.beginSegmentedRecording()
+                } else {
+                    self.transcribedText = "麦克风权限被拒绝"
+                    self.isListening = false
+                }
+            }
+        }
+        #else
+        // iOS中使用传统的权限请求方式
         audioSession.requestRecordPermission { [weak self] granted in
             DispatchQueue.main.async {
                 print("[ListeningViewModel] requestRecordPermission granted: \(granted)")
@@ -56,6 +73,7 @@ class ListeningViewModel: NSObject, ObservableObject, AVAudioRecorderDelegate {
                 }
             }
         }
+        #endif
     }
 
     private func beginSegmentedRecording() {

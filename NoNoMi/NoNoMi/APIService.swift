@@ -13,7 +13,7 @@ import WebKit
 
 // HTML Widget数据模型
 struct HtmlWidget: Identifiable, Codable {
-    let id = UUID()
+    let id: String  // 从服务器返回的ID，移除默认值
     let x: Int
     let y: Int
     let height: Int
