@@ -25,17 +25,15 @@ struct ContentView: View {
                 HStack {
                     // 左上角控制面板
                     controlPanel
-                    
                     Spacer()
-                    
                     // 右上角截图预览
                     screenshotPreview
                 }
-                
                 Spacer()
-                
                 // 底部结果显示
                 HStack {
+                    // 左下角固定ListeningView
+                    ListeningPanel()
                     Spacer()
                     resultView
                 }
@@ -166,6 +164,69 @@ struct ContentView: View {
         } else {
             apiService.responseText = "截图失败"
         }
+    }
+
+}
+
+// 左下角固定ListeningView面板
+struct ListeningPanel: View {
+    @State private var isListening = false
+    @StateObject private var viewModel = ListeningViewModel()
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Listening")
+                .font(.headline)
+                .foregroundColor(.white)
+            Button(action: {
+                print("[ListeningPanel] Button tapped. isListening=\(isListening)")
+                if isListening {
+                    print("[ListeningPanel] Stop listening")
+                    viewModel.stopListening()
+                } else {
+                    print("[ListeningPanel] Start listening")
+                    viewModel.startListening()
+                }
+                isListening.toggle()
+            }) {
+                HStack {
+                    Image(systemName: isListening ? "waveform" : "mic.fill")
+                        .foregroundColor(.white)
+                    Text(isListening ? "正在聆听..." : "开始聆听")
+                        .font(.caption)
+                        .foregroundColor(.white)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.purple.opacity(0.8))
+                )
+            }
+            if isListening {
+                ProgressView()
+                    .scaleEffect(0.8)
+                    .progressViewStyle(CircularProgressViewStyle(tint: .white))
+            }
+            if !viewModel.transcribedText.isEmpty {
+                ScrollView {
+                    Text(viewModel.transcribedText)
+                        .font(.caption)
+                        .foregroundColor(.white)
+                        .padding(6)
+                        .background(Color.black.opacity(0.3))
+                        .cornerRadius(8)
+                }
+                .frame(height: 60)
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 15)
+                .fill(Color.black.opacity(0.6))
+        )
+        .frame(width: 180)
+        .padding(.bottom, 8)
+        .padding(.leading, 8)
     }
 }
 
