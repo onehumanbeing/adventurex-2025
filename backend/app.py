@@ -9,6 +9,7 @@ SILICONFLOW_URL = "https://api.siliconflow.cn/v1/audio/transcriptions"
 MODEL = "FunAudioLLM/SenseVoiceSmall"
 TOKEN = "sk-xdewqafvtfsqxhvovpidjvygplxwsfqrntovkvejdgtjzmgj"  # 硅流API-Key密钥
 
+
 @app.route('/asr/stream', methods=['POST'])
 def asr_stream():
     def generate():
