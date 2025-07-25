@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  NoNoMi
-//
-//  Created by Henry on 24/7/2025.
-//
-
 import SwiftUI
 import RealityKit
 import RealityKitContent
