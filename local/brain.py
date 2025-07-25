@@ -35,7 +35,7 @@ def periodic_ai_task():
     AUDIO_TXT_PATH = os.path.join(".", "cache", "audio", "audio.txt")
     PROMPT_PATH = os.path.join(".", "prompt.txt")
 
-    while True:
+    while int(os.environ.get("BRAIN_LOOP", 0)) == 1:
         # 1. 获取最新的图片
         image_files = glob.glob(os.path.join(IMAGE_DIR, "*"))
         image_files = [f for f in image_files if os.path.isfile(f)]
