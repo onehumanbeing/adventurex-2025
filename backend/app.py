@@ -18,5 +18,14 @@ def agent():
         return jsonify({"error": "No messages provided"}), 400
     return jsonify(gpt_4o_mini(messages))
 
+@app.route('/', methods=['GET'])
+def index():
+    import time
+    return jsonify({
+        "timestamp": int(time.time()),
+        "version": "0.0.1"
+    })
+
+
 if __name__ == '__main__':
     app.run(debug=True)
