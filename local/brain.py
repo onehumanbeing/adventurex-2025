@@ -114,11 +114,19 @@ def periodic_ai_task():
                 f.write(html_content)
             print(f"HTML已保存到: {html_path}")
             # 识别完成后需要删除所有的图片
-            for img_path in image_files:
-                try:
-                    os.remove(img_path)
-                except Exception as e:
-                    print(f"删除图片失败: {img_path}, {e}")
+            if int(os.environ.get("DELETE_IMAGE_AFTER_PROCESS", 0)) == 1:
+                for img_path in image_files:
+                    try:
+                        os.remove(img_path)
+                    except Exception as e:
+                        print(f"删除图片失败: {img_path}, {e}")
+                # 清空audio.txt
+                if os.path.exists(AUDIO_TXT_PATH):
+                    try:
+                        with open(AUDIO_TXT_PATH, "w", encoding="utf-8") as f:
+                            f.write("")
+                    except Exception as e:
+                        print(f"删除audio.txt失败: {AUDIO_TXT_PATH}, {e}")
         except Exception as e:
             print("调用OpenAI失败:", e)
             traceback.print_exc()
