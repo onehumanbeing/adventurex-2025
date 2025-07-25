@@ -11,7 +11,7 @@ class ListeningViewModel: NSObject, ObservableObject, AVAudioRecorderDelegate {
     private var sseTask: URLSessionDataTask?
     private var sseBuffer = Data()
     private let segmentDuration: TimeInterval = 3.0 // 3秒分段
-    private let backendURL = URL(string: "http://localhost:5001/api/asr/stream")! // 修改为你的后端地址
+    private let backendURL = URL(string: "https://adventurex-2025.vercel.app/asr/stream")! 
 
     func toggleListening() {
         if isListening {
