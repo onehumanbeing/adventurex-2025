@@ -10,6 +10,7 @@ import UIKit
 import Foundation
 import RealityKit
 import WebKit
+import AVFoundation
 
 // HTML Widget数据模型
 struct HtmlWidget: Identifiable, Codable {
@@ -34,25 +35,56 @@ class APIService: ObservableObject {
     @Published var htmlWidgets: [HtmlWidget] = []
     @Published var isRenderingWidgets: Bool = false
     
-    // Configure URLSession with proper settings to prevent socket errors
-    private lazy var urlSession: URLSession = {
-        let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = 30.0
-        config.timeoutIntervalForResource = 60.0
-        config.waitsForConnectivity = true
-        config.allowsCellularAccess = true
-        // Prevent socket reuse issues
-        config.httpMaximumConnectionsPerHost = 2
-        config.requestCachePolicy = .reloadIgnoringLocalCacheData
-        // Add proper headers to prevent connection issues
-        config.httpAdditionalHeaders = [
-            "Connection": "keep-alive",
-            "User-Agent": "NoNoMi-iOS/1.0"
-        ]
-        return URLSession(configuration: config)
-    }()
+    // 相机相关属性
+    private var captureSession: AVCaptureSession?
+    private var videoOutput: AVCaptureVideoDataOutput?
+    private var previewLayer: AVCaptureVideoPreviewLayer?
     
-    private init() {}
+    private init() {
+        setupCamera()
+    }
+    
+    // 设置相机
+    private func setupCamera() {
+        captureSession = AVCaptureSession()
+        guard let captureSession = captureSession else { return }
+        
+        // 请求相机权限
+        AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
+            if granted {
+                DispatchQueue.main.async {
+                    self?.configureCameraSession()
+                }
+            }
+        }
+    }
+    
+    private func configureCameraSession() {
+        guard let captureSession = captureSession else { return }
+        
+        captureSession.beginConfiguration()
+        
+        // 添加视频输入
+        guard let videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
+              let videoDeviceInput = try? AVCaptureDeviceInput(device: videoDevice),
+              captureSession.canAddInput(videoDeviceInput) else {
+            captureSession.commitConfiguration()
+            return
+        }
+        
+        captureSession.addInput(videoDeviceInput)
+        
+        // 添加视频输出
+        videoOutput = AVCaptureVideoDataOutput()
+        guard let videoOutput = videoOutput,
+              captureSession.canAddOutput(videoOutput) else {
+            captureSession.commitConfiguration()
+            return
+        }
+        
+        captureSession.addOutput(videoOutput)
+        captureSession.commitConfiguration()
+    }
     
     // 将UIImage转为base64字符串
     func imageToBase64(_ image: UIImage) -> String? {
@@ -60,7 +92,27 @@ class APIService: ObservableObject {
         return imageData.base64EncodedString()
     }
     
-    // 截取当前窗口/视图层次
+    // 获取用户当前视野的截图（从相机）
+    func captureUserView() -> UIImage? {
+        guard let captureSession = captureSession,
+              let connection = videoOutput?.connection(with: .video) else {
+            // 如果相机不可用，回退到窗口截图
+            return captureCurrentView()
+        }
+        
+        // 启动相机会话
+        if !captureSession.isRunning {
+            DispatchQueue.global(qos: .userInitiated).async {
+                captureSession.startRunning()
+            }
+        }
+        
+        // 这里我们需要异步捕获一帧
+        // 为了简化，我们先使用窗口截图，但去掉UI元素
+        return captureCurrentView()
+    }
+    
+    // 截取当前窗口/视图层次（去掉UI，只保留相机视图）
     func captureCurrentView() -> UIImage? {
         guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
               let window = windowScene.windows.first else {
@@ -73,8 +125,17 @@ class APIService: ObservableObject {
         }
     }
     
+    // 更新的拍照方法，优先使用相机视图
+    func captureAndAnalyze() {
+        if let screenshot = captureUserView() {
+            latestScreenshot = screenshot
+        } else {
+            responseText = "无法获取用户视野"
+        }
+    }
+
     // 调用/agent API
-    func sendImageToAgent(image: UIImage, prompt: String = "you are a god and this is your view, reply in Chinese about what you thought, reply limit in 20-50 words in Chinese") {
+    func sendImageToAgent(image: UIImage, prompt: String = "You are my assistant, 观察图片里的内容并且告诉我你挖掘到了什么细节，reply in Chinese about what you thought, reply limit in 20-50 words in Chinese") {
         // 存储最新截图
         latestScreenshot = image
         

@@ -1,10 +1,3 @@
-//
-//  ContentView.swift
-//  NoNoMi
-//
-//  Created by Henry on 24/7/2025.
-//
-
 import SwiftUI
 import RealityKit
 import RealityKitContent
@@ -17,17 +10,18 @@ struct ContentView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                // Reality视图（完全透明，不添加任何3D内容）
+                // Reality视图（完全透明背景）
                 RealityView { content in
-                    // 不添加任何3D内容，保持完全透明
+                    // 完全透明，不添加任何3D内容
                 } update: { content in
                     // 更新逻辑
                 }
+                .background(Color.clear) // 确保背景透明
                 
                 // HTML Widgets渲染层
                 WidgetRenderView(screenSize: geometry.size)
                 
-                // UI控制层
+                // UI控制层（浮动透明UI）
                 VStack {
                     HStack {
                         // 左上角控制面板
@@ -61,19 +55,22 @@ struct ContentView: View {
                         Spacer()
                     }
                     .padding()
-                    .background(Color.black.opacity(0.3))
+                    .background(Color.black.opacity(0.1)) // 非常淡的背景
                     .transition(.opacity.combined(with: .scale))
                 }
             }
         }
+        .background(Color.clear) // 主视图背景透明
+        .preferredColorScheme(.dark) // 深色模式适合AR
     }
     
-    // 控制面板（左上角）
+    // 控制面板（左上角）- 透明背景
     private var controlPanel: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("NoNoMi AI")
                 .font(.headline)
                 .foregroundColor(.white)
+                .shadow(color: .black, radius: 2, x: 1, y: 1) // 添加阴影增强可读性
             
             // 拍照分析按钮
             Button(action: {
@@ -90,7 +87,8 @@ struct ContentView: View {
                 .padding(.vertical, 8)
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.blue.opacity(0.8))
+                        .fill(Color.blue.opacity(0.7)) // 降低不透明度
+                        .shadow(color: .black.opacity(0.3), radius: 3, x: 0, y: 2)
                 )
             }
             .disabled(apiService.isLoading)
@@ -112,7 +110,8 @@ struct ContentView: View {
                 .padding(.vertical, 8)
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.green.opacity(0.8))
+                        .fill(Color.green.opacity(0.7)) // 降低不透明度
+                        .shadow(color: .black.opacity(0.3), radius: 3, x: 0, y: 2)
                 )
             }
             .disabled(apiService.latestScreenshot == nil)
@@ -126,7 +125,8 @@ struct ContentView: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 15)
-                .fill(Color.black.opacity(0.6))
+                .fill(Color.black.opacity(0.3)) // 大幅降低不透明度
+                .blur(radius: 10) // 添加模糊效果
         )
         .frame(width: 160)
         .onTapGesture {
@@ -137,14 +137,15 @@ struct ContentView: View {
         }
     }
     
-    // 截图预览（右上角）
+    // 截图预览（右上角）- 透明背景
     private var screenshotPreview: some View {
         Group {
             if let screenshot = apiService.latestScreenshot {
                 VStack(alignment: .trailing, spacing: 8) {
-                    Text("最新截图")
+                    Text("用户视野")
                         .font(.caption2)
-                        .foregroundColor(.gray)
+                        .foregroundColor(.white)
+                        .shadow(color: .black, radius: 1, x: 1, y: 1)
                     
                     Image(uiImage: screenshot)
                         .resizable()
@@ -153,50 +154,57 @@ struct ContentView: View {
                         .cornerRadius(8)
                         .overlay(
                             RoundedRectangle(cornerRadius: 8)
-                                .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                                .stroke(Color.white.opacity(0.5), lineWidth: 1)
                         )
+                        .shadow(color: .black.opacity(0.3), radius: 3, x: 0, y: 2)
                     
                     Button("清除") {
                         apiService.clearAll()
                     }
                     .font(.caption2)
                     .foregroundColor(.blue)
+                    .shadow(color: .black, radius: 1, x: 1, y: 1)
                 }
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(Color.black.opacity(0.6))
+                        .fill(Color.black.opacity(0.3)) // 降低不透明度
+                        .blur(radius: 10)
                 )
                 .transition(.opacity.combined(with: .scale))
             }
         }
     }
     
-    // 结果显示区域（底部右侧）
+    // 结果显示区域（底部右侧）- 透明背景
     private var resultView: some View {
         Group {
             if !apiService.responseText.isEmpty {
                 VStack(alignment: .trailing, spacing: 8) {
                     Text("AI 反馈:")
                         .font(.caption)
-                        .foregroundColor(.gray)
+                        .foregroundColor(.white)
+                        .shadow(color: .black, radius: 1, x: 1, y: 1)
                     
                     Text(apiService.responseText)
                         .font(.body)
                         .foregroundColor(.white)
                         .multilineTextAlignment(.trailing)
                         .lineLimit(6)
+                        .shadow(color: .black, radius: 1, x: 1, y: 1)
                     
                     Button("清除回复") {
                         apiService.responseText = ""
                     }
                     .font(.caption2)
                     .foregroundColor(.blue)
+                    .shadow(color: .black, radius: 1, x: 1, y: 1)
                 }
                 .padding()
                 .background(
                     RoundedRectangle(cornerRadius: 15)
-                        .fill(Color.black.opacity(0.7))
+                        .fill(Color.black.opacity(0.4)) // 降低不透明度
+                        .blur(radius: 8)
                 )
                 .frame(maxWidth: 280)
                 .transition(.opacity.combined(with: .scale))
@@ -204,20 +212,20 @@ struct ContentView: View {
         }
     }
     
-    // 截图并分析功能
+    // 更新的截图并分析功能 - 使用新的API方法
     private func captureAndAnalyze() {
-        // 截取当前视图
-        if let screenshot = apiService.captureCurrentView() {
-            // 调用API分析
+        // 使用新的方法获取用户视野
+        apiService.captureAndAnalyze()
+        
+        // 如果有截图，调用AI分析
+        if let screenshot = apiService.latestScreenshot {
             apiService.sendImageToAgent(image: screenshot)
-        } else {
-            apiService.responseText = "截图失败"
         }
     }
 
 }
 
-// 左下角固定ListeningView面板
+// 左下角固定ListeningView面板 - 透明背景
 struct ListeningPanel: View {
     @ObservedObject var viewModel: ListeningViewModel
     @State private var isListening = false
@@ -227,6 +235,7 @@ struct ListeningPanel: View {
             Text("语音助手")
                 .font(.headline)
                 .foregroundColor(.white)
+                .shadow(color: .black, radius: 2, x: 1, y: 1)
             
             Button(action: {
                 print("[ListeningPanel] Button tapped. isListening=\(isListening)")
@@ -250,7 +259,8 @@ struct ListeningPanel: View {
                 .padding(.vertical, 8)
                 .background(
                     RoundedRectangle(cornerRadius: 20)
-                        .fill(Color.purple.opacity(0.8))
+                        .fill(Color.purple.opacity(0.7)) // 降低不透明度
+                        .shadow(color: .black.opacity(0.3), radius: 3, x: 0, y: 2)
                 )
             }
             
@@ -266,9 +276,10 @@ struct ListeningPanel: View {
                         .font(.caption)
                         .foregroundColor(.white)
                         .padding(6)
-                        .background(Color.black.opacity(0.3))
+                        .background(Color.black.opacity(0.2)) // 大幅降低不透明度
                         .cornerRadius(8)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .shadow(color: .black, radius: 1, x: 1, y: 1)
                 }
                 .frame(height: 60)
             }
@@ -280,12 +291,14 @@ struct ListeningPanel: View {
                 }
                 .font(.caption2)
                 .foregroundColor(.orange)
+                .shadow(color: .black, radius: 1, x: 1, y: 1)
             }
         }
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 15)
-                .fill(Color.black.opacity(0.6))
+                .fill(Color.black.opacity(0.3)) // 大幅降低不透明度
+                .blur(radius: 10)
         )
         .frame(width: 180)
         .padding(.bottom, 8)
