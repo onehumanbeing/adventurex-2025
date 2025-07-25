@@ -1,0 +1,57 @@
+import os
+import time
+import datetime
+import subprocess
+
+def screenshot_display(display_index: int, filename: str):
+    try:
+        subprocess.run(["screencapture", "-x", "-D", str(display_index), filename], check=True)
+        print(f"Display {display_index} 截图保存至: {os.path.abspath(filename)}")
+    except subprocess.CalledProcessError as e:
+        print(f"截图失败: {e}")
+
+def get_display_count():
+    result = subprocess.run(["system_profiler", "SPDisplaysDataType"], stdout=subprocess.PIPE, text=True)
+    return result.stdout.count("Resolution")
+
+def continuous_screenshot(duration_sec=10, interval_sec=1):
+    output_dir = os.path.abspath(os.path.join(".", "cache", "screenshot"))
+    os.makedirs(output_dir, exist_ok=True)
+
+    display_count = get_display_count()
+    print(f"检测到 {display_count} 个显示器（包括镜像）")
+
+    for i in range(duration_sec):
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        for display_index in range(1, display_count + 1):
+            filename = f"screenshot_d{display_index}_{timestamp}.png"
+            filepath = os.path.join(output_dir, filename)
+            screenshot_display(display_index, filepath)
+
+        time.sleep(interval_sec)
+
+def camera_capture(filename: str):
+    try:
+        subprocess.run(["imagesnap", filename], check=True)
+        print(f"摄像头拍照保存至: {os.path.abspath(filename)}")
+    except subprocess.CalledProcessError as e:
+        print(f"摄像头拍照失败: {e}")
+
+def continuous_camera_capture(duration_sec=10, interval_sec=1):
+    output_dir = os.path.abspath(os.path.join(".", "cache", "camera"))
+    os.makedirs(output_dir, exist_ok=True)
+
+    for i in range(duration_sec):
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        filename = f"camera_{timestamp}.jpg"
+        filepath = os.path.join(output_dir, filename)
+        camera_capture(filepath)
+        time.sleep(interval_sec)
+
+if __name__ == "__main__":
+    SCREENSHOT_INTERVAL = int(os.environ.get("SCREENSHOT_INTERVAL", 1))
+    USE_CAMERA = int(os.environ.get("USE_CAMERA", 0))
+    if USE_CAMERA == 1:
+        continuous_camera_capture(duration_sec=10, interval_sec=SCREENSHOT_INTERVAL)
+    else:
+        continuous_screenshot(duration_sec=10, interval_sec=SCREENSHOT_INTERVAL)

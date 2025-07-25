@@ -75,6 +75,8 @@ Icon
 venv/
 ENV/
 env/
+local/env.sh 
+local/cache/*
 .venv/
 env.bak/
 venv.bak/

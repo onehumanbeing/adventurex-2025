@@ -13,7 +13,7 @@ class VisionOSCameraProvider: ObservableObject {
     @Published var errorMessage: String?
     
     private var arkitSession: ARKitSession?
-    private var cameraFrameProvider: CameraFrameProvider?
+    private var cameraFrameProvider: CameraFramiseProvider?
     private var frameProcessingTask: Task<Void, Never>?
     
     init() {
@@ -24,12 +24,12 @@ class VisionOSCameraProvider: ObservableObject {
         print("[VisionOSCamera] 启动visionOS摄像头...")
         
         do {
-            guard CameraFrameProvider.isSupported else {
-                await MainActor.run {
-                    self.errorMessage = "CameraFrameProvider不支持 - 需要Enterprise权限"
-                }
-                return
-            }
+             guard CameraFrameProvider.isSupported else {
+                 await MainActor.run {
+                     self.errorMessage = "CameraFrameProvider不支持 - 需要Enterprise权限"
+                 }
+                 return
+             }
             
             let session = ARKitSession()
             let provider = CameraFrameProvider()
