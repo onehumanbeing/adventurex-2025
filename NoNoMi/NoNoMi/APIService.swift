@@ -10,7 +10,6 @@ import UIKit
 import Foundation
 import RealityKit
 import WebKit
-import ARKit
 
 // HTML Widget数据模型
 struct HtmlWidget: Identifiable, Codable {
@@ -34,7 +33,7 @@ class APIService: ObservableObject {
     @Published var latestScreenshot: UIImage? = nil
     @Published var htmlWidgets: [HtmlWidget] = []
     @Published var isRenderingWidgets: Bool = false
-    @Published var currentARFrame: ARFrame? = nil
+    @Published var currentCameraImage: UIImage? = nil
     
     // Configure URLSession with proper settings to prevent socket errors
     private lazy var urlSession: URLSession = {
@@ -62,20 +61,15 @@ class APIService: ObservableObject {
         return imageData.base64EncodedString()
     }
     
-    // 从ARFrame获取相机图像（visionOS专用）
+    // 获取当前相机图像
     func captureCameraImage() -> UIImage? {
-        guard let arFrame = currentARFrame else {
-            print("No AR frame available")
-            return nil
-        }
-        
-        return arFrame.toCameraImage()
+        return currentCameraImage
     }
     
     // 截取当前窗口/视图层次（备用方法）
     func captureCurrentView() -> UIImage? {
-        // 首先尝试从ARFrame获取相机图像
-        if let cameraImage = captureCameraImage() {
+        // 首先尝试从相机获取图像
+        if let cameraImage = currentCameraImage {
             return cameraImage
         }
         
@@ -89,19 +83,6 @@ class APIService: ObservableObject {
         return renderer.image { context in
             window.drawHierarchy(in: window.bounds, afterScreenUpdates: false)
         }
-    }
-    
-    // 使用ARFrame直接发送到API
-    func sendARFrameToAgent(arFrame: ARFrame, prompt: String = "you are a god and this is your view, reply in Chinese about what you thought, reply limit in 20-50 words in Chinese") {
-        guard let cameraImage = arFrame.toCameraImage() else {
-            responseText = "无法从AR帧获取图像"
-            return
-        }
-        
-        // 存储最新截图
-        latestScreenshot = cameraImage
-        
-        sendImageToAgent(image: cameraImage, prompt: prompt)
     }
     
     // 调用/agent API
@@ -299,7 +280,7 @@ class APIService: ObservableObject {
     func clearWidgets() {
         htmlWidgets = []
     }
-} 
+}
 
 // MARK: - SiliconFlow 语音转写服务
 class SiliconFlowASRService {

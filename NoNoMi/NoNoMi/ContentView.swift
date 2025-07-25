@@ -1,23 +1,25 @@
 import SwiftUI
 import RealityKit
 import RealityKitContent
-import ARKit
 
 struct ContentView: View {
     @ObservedObject private var apiService = APIService.shared
     @StateObject private var listeningViewModel = ListeningViewModel()
     @State private var showWidgetGenerator = false
-    @State private var currentARFrame: ARFrame?
+    @State private var currentCameraImage: UIImage?
+    @State private var cameraFrameCount = 0
     
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                // ARKit相机视图（完全透明背景）
-                ARCameraView(latestFrame: $currentARFrame, apiService: apiService)
+                // 相机视图（支持iOS ARKit和visionOS截图）
+                ARCameraView(latestFrame: $currentCameraImage, apiService: apiService)
                     .background(Color.clear)
-                    .onChange(of: currentARFrame) { frame in
-                        if let frame = frame {
-                            apiService.currentARFrame = frame
+                    .onChange(of: currentCameraImage) { oldValue, newValue in
+                        if let image = newValue {
+                            apiService.currentCameraImage = image
+                            cameraFrameCount += 1
+                            print("[ContentView] 收到相机帧 #\(cameraFrameCount)，尺寸: \(image.size)")
                         }
                     }
                 
@@ -65,6 +67,9 @@ struct ContentView: View {
         }
         .background(Color.clear) // 主视图背景透明
         .preferredColorScheme(.dark) // 深色模式适合AR
+        .onAppear {
+            print("[ContentView] 视图已出现")
+        }
     }
     
     // 控制面板（左上角）- 透明背景
@@ -76,12 +81,20 @@ struct ContentView: View {
                 .shadow(color: .black, radius: 2, x: 1, y: 1) // 添加阴影增强可读性
             
             // 相机状态指示
-            HStack {
-                Image(systemName: currentARFrame != nil ? "camera.fill" : "camera.circle")
-                    .foregroundColor(currentARFrame != nil ? .green : .red)
-                Text(currentARFrame != nil ? "相机就绪" : "相机未就绪")
-                    .font(.caption2)
-                    .foregroundColor(.white)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Image(systemName: currentCameraImage != nil ? "camera.fill" : "camera.circle")
+                        .foregroundColor(currentCameraImage != nil ? .green : .orange)
+                    Text(getCameraStatusText())
+                        .font(.caption2)
+                        .foregroundColor(.white)
+                }
+                
+                if cameraFrameCount > 0 {
+                    Text("帧数: \(cameraFrameCount)")
+                        .font(.caption2)
+                        .foregroundColor(.gray)
+                }
             }
             .shadow(color: .black, radius: 1, x: 1, y: 1)
             
@@ -104,7 +117,7 @@ struct ContentView: View {
                         .shadow(color: .black.opacity(0.3), radius: 3, x: 0, y: 2)
                 )
             }
-            .disabled(apiService.isLoading || currentARFrame == nil)
+            .disabled(apiService.isLoading)
             
             // Widget生成按钮
             Button(action: {
@@ -141,12 +154,25 @@ struct ContentView: View {
                 .fill(Color.black.opacity(0.3)) // 大幅降低不透明度
                 .blur(radius: 10) // 添加模糊效果
         )
-        .frame(width: 160)
+        .frame(width: 180)
         .onTapGesture {
             // 备用手势：点击控制面板触发
-            if !apiService.isLoading && currentARFrame != nil {
+            if !apiService.isLoading {
                 captureAndAnalyze()
             }
+        }
+    }
+    
+    // 获取相机状态文本
+    private func getCameraStatusText() -> String {
+        if currentCameraImage != nil {
+            #if os(iOS)
+            return "ARKit相机就绪"
+            #else
+            return "截图模式就绪"
+            #endif
+        } else {
+            return "等待相机..."
         }
     }
     
@@ -225,18 +251,15 @@ struct ContentView: View {
         }
     }
     
-    // 截图并分析功能 - 优先使用ARKit相机数据
+    // 截图并分析功能
     private func captureAndAnalyze() {
-        if let arFrame = currentARFrame {
-            // 使用ARKit相机数据
-            apiService.sendARFrameToAgent(arFrame: arFrame)
+        print("[ContentView] 开始截图并分析")
+        if let screenshot = apiService.captureCurrentView() {
+            print("[ContentView] 成功获取截图，尺寸: \(screenshot.size)")
+            apiService.sendImageToAgent(image: screenshot)
         } else {
-            // 备用方法：截取当前视图
-            if let screenshot = apiService.captureCurrentView() {
-                apiService.sendImageToAgent(image: screenshot)
-            } else {
-                apiService.responseText = "截图失败"
-            }
+            print("[ContentView] 截图失败")
+            apiService.responseText = "截图失败"
         }
     }
 
