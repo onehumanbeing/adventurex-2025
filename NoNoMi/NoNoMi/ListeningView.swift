@@ -25,6 +25,7 @@ class ListeningViewModel: NSObject, ObservableObject {
     }
 
     func startListening() {
+        print("[ListeningViewModel] startListening called")
         transcribedText = ""
         segmentIndex = 0
         isListening = true
@@ -32,8 +33,10 @@ class ListeningViewModel: NSObject, ObservableObject {
     }
 
     private func requestMicPermissionAndStart() {
+        print("[ListeningViewModel] requestMicPermissionAndStart called")
         AVAudioSession.sharedInstance().requestRecordPermission { [weak self] granted in
             DispatchQueue.main.async {
+                print("[ListeningViewModel] requestRecordPermission granted: \(granted)")
                 if granted {
                     self?.startVADListening()
                 } else {
@@ -59,6 +62,7 @@ class ListeningViewModel: NSObject, ObservableObject {
     }
 
     private func startVADListening() {
+        print("[ListeningViewModel] startVADListening called")
         let input = engine.inputNode
         let format = input.outputFormat(forBus: 0)
         bufferList.removeAll()
@@ -132,23 +136,53 @@ class ListeningViewModel: NSObject, ObservableObject {
         }
     }
 
+    // 从 Info.plist 读取硅流API Key
+    private var siliconflowApiKey: String? {
+        Bundle.main.object(forInfoDictionaryKey: "SiliconFlowAPIKey") as? String
+    }
+
+    // 存储所有分片转写结果，便于长语音拼接
+    private var segmentResults: [Int: String] = [:]
+
     private func uploadAudioSegment(fileURL: URL) {
-        var request = URLRequest(url: backendURL)
-        request.httpMethod = "POST"
-        let boundary = "Boundary-\(UUID().uuidString)"
-        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        var data = Data()
-        let filename = fileURL.lastPathComponent
-        let mimetype = "audio/m4a"
-        if let fileData = try? Data(contentsOf: fileURL) {
-            data.append("--\(boundary)\r\n".data(using: .utf8)!)
-            data.append("Content-Disposition: form-data; name=\"audio\"; filename=\"\(filename)\"\r\n".data(using: .utf8)!)
-            data.append("Content-Type: \(mimetype)\r\n\r\n".data(using: .utf8)!)
-            data.append(fileData)
-            data.append("\r\n".data(using: .utf8)!)
-            data.append("--\(boundary)--\r\n".data(using: .utf8)!)
-            let task = URLSession.shared.uploadTask(with: request, from: data) { _, _, _ in }
-            task.resume()
+        guard let audioData = try? Data(contentsOf: fileURL) else {
+            let msg = "[VAD] 读取音频文件失败"
+            print(msg)
+            DispatchQueue.main.async {
+                self.transcribedText += msg + "\n"
+            }
+            return
+        }
+        guard let apiKey = siliconflowApiKey, !apiKey.isEmpty else {
+            let msg = "[配置错误] 未设置硅流API Key，请在Info.plist中添加 SiliconFlowAPIKey"
+            print(msg)
+            DispatchQueue.main.async {
+                self.transcribedText += msg + "\n"
+            }
+            return
+        }
+        let currentSegment = segmentIndex // 保留当前分片编号
+        SiliconFlowASRService.shared.transcribe(
+            audioData: audioData,
+            fileName: fileURL.lastPathComponent,
+            apiKey: apiKey
+        ) { [weak self] text, error in
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                if let text = text, !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    self.segmentResults[currentSegment] = text
+                } else if let error = error {
+                    let errMsg = "[转写失败] 分片\(currentSegment)：\(error.localizedDescription)"
+                    self.segmentResults[currentSegment] = errMsg
+                } else {
+                    let errMsg = "[转写失败] 分片\(currentSegment)：未知错误"
+                    self.segmentResults[currentSegment] = errMsg
+                }
+                // 拼接所有分片，按顺序展示，避免重复
+                let sortedKeys = self.segmentResults.keys.sorted()
+                let merged = sortedKeys.map { self.segmentResults[$0] ?? "" }.joined(separator: " ")
+                self.transcribedText = merged
+            }
         }
     }
 

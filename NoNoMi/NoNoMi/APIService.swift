@@ -303,3 +303,106 @@ class APIService: ObservableObject {
         htmlWidgets = []
     }
 } 
+
+// MARK: - SiliconFlow 语音转写服务
+class SiliconFlowASRService {
+    static let shared = SiliconFlowASRService()
+    private init() {}
+
+    /// 调用硅流API进行音频转写
+    /// - Parameters:
+    ///   - audioData: 音频二进制数据
+    ///   - fileName: 文件名（如 audio.m4a）
+    ///   - mimeType: 文件类型（如 audio/m4a）
+    ///   - apiKey: 硅流API Key
+    ///   - model: 模型名，默认 FunAudioLLM/SenseVoiceSmall
+    ///   - completion: 回调(转写文本, 错误)
+    func transcribe(
+        audioData: Data,
+        fileName: String,
+        mimeType: String = "audio/m4a",
+        apiKey: String,
+        model: String = "FunAudioLLM/SenseVoiceSmall",
+        completion: @escaping (String?, Error?) -> Void
+    ) {
+        let url = URL(string: "https://api.siliconflow.cn/v1/audio/transcriptions")!
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        let boundary = "Boundary-\(UUID().uuidString)"
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
+
+        // 构造 multipart/form-data
+        var body = Data()
+        // model 字段
+        body.append("--\(boundary)\r\n")
+        body.append("Content-Disposition: form-data; name=\"model\"\r\n\r\n")
+        body.append("\(model)\r\n")
+        // 文件字段
+        body.append("--\(boundary)\r\n")
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(fileName)\"\r\n")
+        body.append("Content-Type: \(mimeType)\r\n\r\n")
+        body.append(audioData)
+        body.append("\r\n")
+        // 结束
+        body.append("--\(boundary)--\r\n")
+        request.httpBody = body
+
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(nil, error)
+                return
+            }
+            guard let data = data else {
+                completion(nil, NSError(domain: "NoData", code: -1, userInfo: nil))
+                return
+            }
+            // 解析返回
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let text = json["text"] as? String {
+                completion(text, nil)
+            } else if let str = String(data: data, encoding: .utf8) {
+                completion(str, nil)
+            } else {
+                completion(nil, NSError(domain: "ParseError", code: -2, userInfo: nil))
+            }
+        }
+        task.resume()
+    }
+}
+
+// Data扩展，方便拼接字符串
+private extension Data {
+    mutating func append(_ string: String) {
+        if let data = string.data(using: .utf8) {
+            append(data)
+        }
+    }
+}
+
+// MARK: - 示例调用方法（可放在你的 ViewModel 或 View 里）
+// 用法：SiliconFlowASRService.shared.transcribe(audioData:..., fileName:..., apiKey:...) { ... }
+// 例如：
+/*
+func exampleTranscribe() {
+    guard let audioURL = Bundle.main.url(forResource: "test", withExtension: "m4a"),
+          let audioData = try? Data(contentsOf: audioURL) else {
+        print("音频文件读取失败")
+        return
+    }
+    let apiKey = "你的硅流API Key"
+    SiliconFlowASRService.shared.transcribe(
+        audioData: audioData,
+        fileName: "test.m4a",
+        apiKey: apiKey
+    ) { text, error in
+        DispatchQueue.main.async {
+            if let text = text {
+                print("转写结果：\(text)")
+            } else if let error = error {
+                print("转写失败：\(error.localizedDescription)")
+            }
+        }
+    }
+}
+*/ 
