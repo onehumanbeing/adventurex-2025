@@ -4,7 +4,11 @@ import traceback
 import os
 import time
 import base64
+import json
 import glob
+from generate_audio import t2a_minimax
+
+HOST_URL = "https://helped-monthly-alpaca.ngrok-free.app"
 
 class HtmlView(BaseModel):
     height: int
@@ -21,7 +25,7 @@ def call_openai_api(messages):
         max_tokens=10000,
     )
     response = completion.choices[0].message.parsed
-    return {"height": response.height, "width": response.width, "html": response.html, "danmu_text": response.danmu_text}
+    return response
 
 def periodic_ai_task():
     print("开始AI任务")
@@ -35,13 +39,13 @@ def periodic_ai_task():
     AUDIO_TXT_PATH = os.path.join(".", "cache", "audio", "audio.txt")
     PROMPT_PATH = os.path.join(".", "prompt.txt")
 
-    while int(os.environ.get("BRAIN_LOOP", 0)) == 1:
+    while True:
         # 1. 获取最新的图片
         image_files = glob.glob(os.path.join(IMAGE_DIR, "*"))
         image_files = [f for f in image_files if os.path.isfile(f)]
         image_files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
         latest_images = image_files[:SCREENSHOT_UPLOAD_AMOUNT]
-
+        current_timestamp = int(time.time())
         # 如果图片数量为0，则等待5s再看
         if len(image_files) == 0:
             print("未检测到图片，5秒后重试。", IMAGE_DIR)
@@ -97,6 +101,26 @@ def periodic_ai_task():
         try:
             result = call_openai_api(messages)
             print("AI HTML结果:", result)
+            # 6. 调用minimax
+            if result.danmu_text != "":
+                audio = t2a_minimax(result.danmu_text)
+                with open(f"cache/voice/{current_timestamp}.mp3", "wb") as f:
+                    f.write(audio)
+                route = f"/voice/{current_timestamp}.mp3"
+                print("minimax结果:", route)
+            else:
+                route = ""
+            data = {
+                "voice": "" if route == "" else f"{HOST_URL}{route}",
+                "timestamp": current_timestamp,
+                "html": result.html,
+                "danmu_text": result.danmu_text,
+                "height": result.height,
+                "width": result.width
+            }
+            print("data:", data)
+            with open("cache/status.json", "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=4)
             # INSERT_YOUR_CODE
             # 在 ./cache/html 里保存 .html，用timestamp命名
             html_dir = os.path.join(".", "cache", "html")
@@ -130,6 +154,11 @@ def periodic_ai_task():
         except Exception as e:
             print("调用OpenAI失败:", e)
             traceback.print_exc()
+        brain_loop = int(os.environ.get("BRAIN_LOOP", 0))
+        if brain_loop == 1:
+            continue
+        else:
+            break
         time.sleep(AI_TIME_INTERVAL)
 
 if __name__ == "__main__":
