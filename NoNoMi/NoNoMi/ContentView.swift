@@ -1,22 +1,25 @@
 import SwiftUI
 import RealityKit
 import RealityKitContent
+import ARKit
 
 struct ContentView: View {
-    @StateObject private var apiService = APIService.shared
+    @ObservedObject private var apiService = APIService.shared
     @StateObject private var listeningViewModel = ListeningViewModel()
     @State private var showWidgetGenerator = false
+    @State private var currentARFrame: ARFrame?
     
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                // Reality视图（完全透明背景）
-                RealityView { content in
-                    // 完全透明，不添加任何3D内容
-                } update: { content in
-                    // 更新逻辑
-                }
-                .background(Color.clear) // 确保背景透明
+                // ARKit相机视图（完全透明背景）
+                ARCameraView(latestFrame: $currentARFrame, apiService: apiService)
+                    .background(Color.clear)
+                    .onChange(of: currentARFrame) { frame in
+                        if let frame = frame {
+                            apiService.currentARFrame = frame
+                        }
+                    }
                 
                 // HTML Widgets渲染层
                 WidgetRenderView(screenSize: geometry.size)
@@ -72,6 +75,16 @@ struct ContentView: View {
                 .foregroundColor(.white)
                 .shadow(color: .black, radius: 2, x: 1, y: 1) // 添加阴影增强可读性
             
+            // 相机状态指示
+            HStack {
+                Image(systemName: currentARFrame != nil ? "camera.fill" : "camera.circle")
+                    .foregroundColor(currentARFrame != nil ? .green : .red)
+                Text(currentARFrame != nil ? "相机就绪" : "相机未就绪")
+                    .font(.caption2)
+                    .foregroundColor(.white)
+            }
+            .shadow(color: .black, radius: 1, x: 1, y: 1)
+            
             // 拍照分析按钮
             Button(action: {
                 captureAndAnalyze()
@@ -91,7 +104,7 @@ struct ContentView: View {
                         .shadow(color: .black.opacity(0.3), radius: 3, x: 0, y: 2)
                 )
             }
-            .disabled(apiService.isLoading)
+            .disabled(apiService.isLoading || currentARFrame == nil)
             
             // Widget生成按钮
             Button(action: {
@@ -131,7 +144,7 @@ struct ContentView: View {
         .frame(width: 160)
         .onTapGesture {
             // 备用手势：点击控制面板触发
-            if !apiService.isLoading {
+            if !apiService.isLoading && currentARFrame != nil {
                 captureAndAnalyze()
             }
         }
@@ -212,14 +225,18 @@ struct ContentView: View {
         }
     }
     
-    // 更新的截图并分析功能 - 使用新的API方法
+    // 截图并分析功能 - 优先使用ARKit相机数据
     private func captureAndAnalyze() {
-        // 使用新的方法获取用户视野
-        apiService.captureAndAnalyze()
-        
-        // 如果有截图，调用AI分析
-        if let screenshot = apiService.latestScreenshot {
-            apiService.sendImageToAgent(image: screenshot)
+        if let arFrame = currentARFrame {
+            // 使用ARKit相机数据
+            apiService.sendARFrameToAgent(arFrame: arFrame)
+        } else {
+            // 备用方法：截取当前视图
+            if let screenshot = apiService.captureCurrentView() {
+                apiService.sendImageToAgent(image: screenshot)
+            } else {
+                apiService.responseText = "截图失败"
+            }
         }
     }
 

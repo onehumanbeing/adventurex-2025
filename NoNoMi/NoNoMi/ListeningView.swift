@@ -1,21 +1,14 @@
 import SwiftUI
 import AVFoundation
 
-class ListeningViewModel: NSObject, ObservableObject {
+class ListeningViewModel: NSObject, ObservableObject, AVAudioRecorderDelegate {
     @Published var transcribedText = ""
     @Published var isListening = false
-    private let engine = AVAudioEngine()
-    private var audioFile: AVAudioFile?
-    private var bufferList: [AVAudioPCMBuffer] = []
-    private var lastSpeechTime: Date = Date()
-    private var isSpeaking = false
-    private var vadTimer: Timer?
-    private let silenceThreshold: Float = 0.01 // 音量门限
-    private let silenceDuration: TimeInterval = 0.5 // 静音超过0.5秒自动分片
-    private let backendURL = URL(string: "https://adventurex-2025.vercel.app/asr/stream")!
+    private var audioRecorder: AVAudioRecorder?
+    private var timer: Timer?
+    private var audioSession: AVAudioSession = AVAudioSession.sharedInstance()
     private var segmentIndex = 0
     private var sseTask: URLSessionDataTask?
-<<<<<<< HEAD
     private var sseBuffer = Data()
     private let segmentDuration: TimeInterval = 3.0 // 3秒分段
     private let backendURL = URL(string: "https://adventurex-2025.vercel.app/asr/stream")!
@@ -33,9 +26,6 @@ class ListeningViewModel: NSObject, ObservableObject {
         return URLSession(configuration: config)
     }()
 
-=======
-    
->>>>>>> 51de91fa9fb009779d704204a6d2a73886e68093
     func toggleListening() {
         if isListening {
             stopListening()
@@ -51,7 +41,6 @@ class ListeningViewModel: NSObject, ObservableObject {
         requestMicPermissionAndStart()
     }
 
-<<<<<<< HEAD
     func stopListening() {
         isListening = false
         audioRecorder?.stop()
@@ -65,22 +54,18 @@ class ListeningViewModel: NSObject, ObservableObject {
         transcribedText = ""
     }
 
-=======
->>>>>>> 51de91fa9fb009779d704204a6d2a73886e68093
     private func requestMicPermissionAndStart() {
-        AVAudioSession.sharedInstance().requestRecordPermission { [weak self] granted in
+        audioSession.requestRecordPermission { [weak self] granted in
             DispatchQueue.main.async {
                 if granted {
-                    self?.startVADListening()
+                    self?.beginSegmentedRecording()
                 } else {
                     self?.transcribedText = "麦克风权限被拒绝"
-                    self?.isListening = false
                 }
             }
         }
     }
 
-<<<<<<< HEAD
     private func beginSegmentedRecording() {
         do {
             try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
@@ -114,93 +99,14 @@ class ListeningViewModel: NSObject, ObservableObject {
         } catch {
             print("Recording failed: \(error)")
             transcribedText = "录音失败: \(error.localizedDescription)"
-=======
-    func stopListening() {
-        isListening = false
-        engine.inputNode.removeTap(onBus: 0)
-        engine.stop()
-        vadTimer?.invalidate()
-        sseTask?.cancel()
-        bufferList.removeAll()
-    }
-
-    // 清除转录文本
-    func clearTranscribedText() {
-        transcribedText = ""
-    }
-
-    private func startVADListening() {
-        let input = engine.inputNode
-        let format = input.outputFormat(forBus: 0)
-        bufferList.removeAll()
-        isSpeaking = false
-        lastSpeechTime = Date()
-        
-        input.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
-            guard let self = self else { return }
-            let rms = self.calculateRMS(buffer: buffer)
-            if rms > self.silenceThreshold {
-                // 检测到说话
-                if !self.isSpeaking {
-                    self.isSpeaking = true
-                    self.lastSpeechTime = Date()
-                }
-                self.lastSpeechTime = Date()
-                self.bufferList.append(buffer.copy() as! AVAudioPCMBuffer)
-            } else {
-                // 静音
-                if self.isSpeaking {
-                    self.bufferList.append(buffer.copy() as! AVAudioPCMBuffer)
-                }
-            }
         }
-        try? engine.start()
-        // 启动定时器检测静音
-        vadTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
-            self?.checkSilenceAndSegment()
-        }
-        // 启动SSE监听
-        startSSEStream()
-    }
-
-    private func checkSilenceAndSegment() {
-        if isSpeaking && Date().timeIntervalSince(lastSpeechTime) > silenceDuration {
-            // 静音超过阈值，分片上传
-            isSpeaking = false
-            segmentIndex += 1
-            let filename = FileManager.default.temporaryDirectory.appendingPathComponent("vad_segment_\(segmentIndex).m4a")
-            if let fileURL = writeBuffersToFile(buffers: bufferList, format: engine.inputNode.outputFormat(forBus: 0), fileURL: filename) {
-                uploadAudioSegment(fileURL: fileURL)
-            }
-            bufferList.removeAll()
-        }
-    }
-
-    private func calculateRMS(buffer: AVAudioPCMBuffer) -> Float {
-        guard let channelData = buffer.floatChannelData?[0] else { return 0 }
-        let frameLength = Int(buffer.frameLength)
-        var sum: Float = 0
-        for i in 0..<frameLength {
-            sum += channelData[i] * channelData[i]
->>>>>>> 51de91fa9fb009779d704204a6d2a73886e68093
-        }
-        return sqrt(sum / Float(frameLength))
-    }
-
-    private func writeBuffersToFile(buffers: [AVAudioPCMBuffer], format: AVAudioFormat, fileURL: URL) -> URL? {
-        guard !buffers.isEmpty else { return nil }
-        do {
-            if FileManager.default.fileExists(atPath: fileURL.path) {
-                try FileManager.default.removeItem(at: fileURL)
-            }
-            let file = try AVAudioFile(forWriting: fileURL, settings: format.settings)
-            for buffer in buffers {
-                try file.write(from: buffer)
-            }
-            return fileURL
-        } catch {
-            print("[VAD] 写入音频文件失败: \(error)")
-            return nil
+        // 上一段录音上传
+        if segmentIndex > 1 {
+            let prevFilename = FileManager.default.temporaryDirectory.appendingPathComponent("segment_\(segmentIndex-1).m4a")
+            uploadAudioSegment(fileURL: prevFilename)
+        } else {
+            // 第一次录音时，启动SSE监听
+            startSSEStream()
         }
     }
 
@@ -230,7 +136,7 @@ class ListeningViewModel: NSObject, ObservableObject {
             data.append("\r\n".data(using: .utf8)!)
             data.append("--\(boundary)--\r\n".data(using: .utf8)!)
             
-            let task = urlSession.uploadTask(with: request, from: data) { [weak self] responseData, response, error in
+            let task = urlSession.uploadTask(with: request, from: data) { [weak self] (responseData: Data?, response: URLResponse?, error: Error?) in
                 if let error = error {
                     print("Upload error: \(error.localizedDescription)")
                     return
@@ -268,7 +174,7 @@ class ListeningViewModel: NSObject, ObservableObject {
         // Send empty multipart to establish SSE connection
         let data = "--\(boundary)--\r\n".data(using: .utf8)!
         
-        sseTask = urlSession.uploadTask(with: request, from: data) { [weak self] data, response, error in
+        sseTask = urlSession.uploadTask(with: request, from: data) { [weak self] (data: Data?, response: URLResponse?, error: Error?) in
             if let error = error {
                 print("SSE connection error: \(error.localizedDescription)")
                 DispatchQueue.main.async {
@@ -323,6 +229,7 @@ class ListeningViewModel: NSObject, ObservableObject {
     }
 }
 
+// 用于Data拼接
 fileprivate extension Data {
     mutating func append(_ string: String) {
         if let data = string.data(using: .utf8) {
