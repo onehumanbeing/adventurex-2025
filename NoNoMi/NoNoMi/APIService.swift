@@ -34,6 +34,24 @@ class APIService: ObservableObject {
     @Published var htmlWidgets: [HtmlWidget] = []
     @Published var isRenderingWidgets: Bool = false
     
+    // Configure URLSession with proper settings to prevent socket errors
+    private lazy var urlSession: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 30.0
+        config.timeoutIntervalForResource = 60.0
+        config.waitsForConnectivity = true
+        config.allowsCellularAccess = true
+        // Prevent socket reuse issues
+        config.httpMaximumConnectionsPerHost = 2
+        config.requestCachePolicy = .reloadIgnoringLocalCacheData
+        // Add proper headers to prevent connection issues
+        config.httpAdditionalHeaders = [
+            "Connection": "keep-alive",
+            "User-Agent": "NoNoMi-iOS/1.0"
+        ]
+        return URLSession(configuration: config)
+    }()
+    
     private init() {}
     
     // 将UIImage转为base64字符串
@@ -75,6 +93,7 @@ class APIService: ObservableObject {
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.timeoutInterval = 30.0
         request.addValue(apiKey, forHTTPHeaderField: "X-API-KEY")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         
@@ -97,13 +116,22 @@ class APIService: ObservableObject {
             return
         }
         
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+        urlSession.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
                 self?.isLoading = false
                 
                 if let error = error {
+                    print("Network error: \(error.localizedDescription)")
                     self?.responseText = "网络错误: \(error.localizedDescription)"
                     return
+                }
+                
+                if let httpResponse = response as? HTTPURLResponse {
+                    print("Response status code: \(httpResponse.statusCode)")
+                    if httpResponse.statusCode != 200 {
+                        self?.responseText = "服务器错误: \(httpResponse.statusCode)"
+                        return
+                    }
                 }
                 
                 guard let data = data else {
@@ -119,6 +147,7 @@ class APIService: ObservableObject {
                         self?.responseText = "解析响应失败"
                     }
                 } catch {
+                    print("JSON parsing error: \(error)")
                     self?.responseText = "JSON解析错误: \(error.localizedDescription)"
                 }
             }
@@ -143,6 +172,7 @@ class APIService: ObservableObject {
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.timeoutInterval = 45.0 // Longer timeout for widget generation
         request.addValue(apiKey, forHTTPHeaderField: "X-API-KEY")
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         
@@ -184,13 +214,22 @@ class APIService: ObservableObject {
             return
         }
         
-        URLSession.shared.dataTask(with: request) { [weak self] data, response, error in
+        urlSession.dataTask(with: request) { [weak self] data, response, error in
             DispatchQueue.main.async {
                 self?.isRenderingWidgets = false
                 
                 if let error = error {
+                    print("Widget generation error: \(error.localizedDescription)")
                     self?.responseText = "网络错误: \(error.localizedDescription)"
                     return
+                }
+                
+                if let httpResponse = response as? HTTPURLResponse {
+                    print("Widget response status code: \(httpResponse.statusCode)")
+                    if httpResponse.statusCode != 200 {
+                        self?.responseText = "服务器错误: \(httpResponse.statusCode)"
+                        return
+                    }
                 }
                 
                 guard let data = data else {
@@ -206,7 +245,13 @@ class APIService: ObservableObject {
                     self?.responseText = "成功生成 \(widgetData.count) 个widgets"
                 } catch {
                     print("Widget解析错误: \(error)")
-                    self?.responseText = "Widget解析错误: \(error.localizedDescription)"
+                    // Try to parse as error response
+                    if let errorJson = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+                       let errorMessage = errorJson["error"] as? String {
+                        self?.responseText = "服务器错误: \(errorMessage)"
+                    } else {
+                        self?.responseText = "Widget解析错误: \(error.localizedDescription)"
+                    }
                 }
             }
         }.resume()

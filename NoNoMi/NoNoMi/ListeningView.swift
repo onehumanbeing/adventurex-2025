@@ -11,7 +11,20 @@ class ListeningViewModel: NSObject, ObservableObject, AVAudioRecorderDelegate {
     private var sseTask: URLSessionDataTask?
     private var sseBuffer = Data()
     private let segmentDuration: TimeInterval = 3.0 // 3秒分段
-    private let backendURL = URL(string: "https://adventurex-2025.vercel.app/asr/stream")! 
+    private let backendURL = URL(string: "https://adventurex-2025.vercel.app/asr/stream")!
+    
+    // Configure URLSession with proper timeout settings
+    private lazy var urlSession: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 30.0
+        config.timeoutIntervalForResource = 60.0
+        config.waitsForConnectivity = true
+        config.allowsCellularAccess = true
+        // Disable connection pooling to prevent socket reuse issues
+        config.requestCachePolicy = .reloadIgnoringLocalCacheData
+        config.httpMaximumConnectionsPerHost = 1
+        return URLSession(configuration: config)
+    }()
 
     func toggleListening() {
         if isListening {
@@ -33,6 +46,7 @@ class ListeningViewModel: NSObject, ObservableObject, AVAudioRecorderDelegate {
         audioRecorder?.stop()
         timer?.invalidate()
         sseTask?.cancel()
+        sseTask = nil
     }
     
     // 清除转录文本
@@ -53,8 +67,15 @@ class ListeningViewModel: NSObject, ObservableObject, AVAudioRecorderDelegate {
     }
 
     private func beginSegmentedRecording() {
-        try? audioSession.setCategory(.playAndRecord, mode: .default)
-        try? audioSession.setActive(true)
+        do {
+            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth])
+            try audioSession.setActive(true)
+        } catch {
+            print("Audio session setup failed: \(error)")
+            transcribedText = "音频设置失败: \(error.localizedDescription)"
+            return
+        }
+        
         recordNewSegment()
         timer = Timer.scheduledTimer(withTimeInterval: segmentDuration, repeats: true) { [weak self] _ in
             self?.recordNewSegment()
@@ -76,6 +97,7 @@ class ListeningViewModel: NSObject, ObservableObject, AVAudioRecorderDelegate {
             audioRecorder?.delegate = self
             audioRecorder?.record(forDuration: segmentDuration)
         } catch {
+            print("Recording failed: \(error)")
             transcribedText = "录音失败: \(error.localizedDescription)"
         }
         // 上一段录音上传
@@ -89,57 +111,121 @@ class ListeningViewModel: NSObject, ObservableObject, AVAudioRecorderDelegate {
     }
 
     private func uploadAudioSegment(fileURL: URL) {
+        guard FileManager.default.fileExists(atPath: fileURL.path) else {
+            print("Audio file does not exist at path: \(fileURL.path)")
+            return
+        }
+        
         var request = URLRequest(url: backendURL)
         request.httpMethod = "POST"
+        request.timeoutInterval = 30.0
+        
         let boundary = "Boundary-\(UUID().uuidString)"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        
         var data = Data()
         let filename = fileURL.lastPathComponent
         let mimetype = "audio/m4a"
-        if let fileData = try? Data(contentsOf: fileURL) {
+        
+        do {
+            let fileData = try Data(contentsOf: fileURL)
             data.append("--\(boundary)\r\n".data(using: .utf8)!)
             data.append("Content-Disposition: form-data; name=\"audio\"; filename=\"\(filename)\"\r\n".data(using: .utf8)!)
             data.append("Content-Type: \(mimetype)\r\n\r\n".data(using: .utf8)!)
             data.append(fileData)
             data.append("\r\n".data(using: .utf8)!)
             data.append("--\(boundary)--\r\n".data(using: .utf8)!)
-            let task = URLSession.shared.uploadTask(with: request, from: data) { _, _, _ in }
+            
+            let task = urlSession.uploadTask(with: request, from: data) { [weak self] responseData, response, error in
+                if let error = error {
+                    print("Upload error: \(error.localizedDescription)")
+                    return
+                }
+                
+                if let httpResponse = response as? HTTPURLResponse {
+                    print("Upload response status: \(httpResponse.statusCode)")
+                }
+                
+                // Clean up temp file after successful upload
+                DispatchQueue.global(qos: .background).async {
+                    try? FileManager.default.removeItem(at: fileURL)
+                }
+            }
             task.resume()
+        } catch {
+            print("Failed to read audio file: \(error)")
         }
     }
 
     private func startSSEStream() {
+        // Cancel any existing SSE task
+        sseTask?.cancel()
+        sseBuffer = Data()
+        
         var request = URLRequest(url: backendURL)
         request.httpMethod = "POST"
+        request.timeoutInterval = 0 // No timeout for SSE streams
+        request.setValue("text/event-stream", forHTTPHeaderField: "Accept")
+        request.setValue("no-cache", forHTTPHeaderField: "Cache-Control")
+        
         let boundary = "Boundary-\(UUID().uuidString)"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        // 发送一个空的multipart，保持连接用于SSE
+        
+        // Send empty multipart to establish SSE connection
         let data = "--\(boundary)--\r\n".data(using: .utf8)!
-        sseTask = URLSession.shared.uploadTask(with: request, from: data) { [weak self] data, response, error in
-            // 不处理响应体，SSE 由下面的 streamTask 处理
-        }
-        sseTask?.resume()
-        // 监听SSE流
-        let sseURL = backendURL
-        let sseRequest = URLRequest(url: sseURL)
-        let sseStreamTask = URLSession.shared.dataTask(with: sseRequest) { [weak self] data, response, error in
+        
+        sseTask = urlSession.uploadTask(with: request, from: data) { [weak self] data, response, error in
+            if let error = error {
+                print("SSE connection error: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self?.transcribedText += "[连接错误]\n"
+                }
+                return
+            }
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("SSE response status: \(httpResponse.statusCode)")
+                if httpResponse.statusCode != 200 {
+                    DispatchQueue.main.async {
+                        self?.transcribedText += "[服务器错误: \(httpResponse.statusCode)]\n"
+                    }
+                    return
+                }
+            }
+            
             guard let data = data else { return }
             self?.handleSSEData(data)
         }
-        sseStreamTask.resume()
+        
+        sseTask?.resume()
     }
 
     private func handleSSEData(_ data: Data) {
-        guard let s = String(data: data, encoding: .utf8) else { return }
-        let lines = s.components(separatedBy: "\n")
+        sseBuffer.append(data)
+        
+        guard let string = String(data: sseBuffer, encoding: .utf8) else { return }
+        
+        let lines = string.components(separatedBy: .newlines)
         for line in lines {
-            if line.hasPrefix("data: ") {
-                let text = line.replacingOccurrences(of: "data: ", with: "")
-                DispatchQueue.main.async {
-                    self.transcribedText += text + "\n"
+            let trimmedLine = line.trimmingCharacters(in: .whitespacesAndNewlines)
+            if trimmedLine.hasPrefix("data: ") {
+                let text = trimmedLine.replacingOccurrences(of: "data: ", with: "")
+                if !text.isEmpty && text != "null" {
+                    DispatchQueue.main.async {
+                        self.transcribedText += text + " "
+                    }
                 }
             }
         }
+        
+        // Clear buffer if we processed complete lines
+        if string.hasSuffix("\n\n") {
+            sseBuffer = Data()
+        }
+    }
+    
+    deinit {
+        stopListening()
     }
 }
 
