@@ -7,7 +7,7 @@ app = Flask(__name__)
 
 SILICONFLOW_URL = "https://api.siliconflow.cn/v1/audio/transcriptions"
 MODEL = "FunAudioLLM/SenseVoiceSmall"
-TOKEN = "sk-xdewqafvtfsqxhvovpidjvygplxwsfqrntovkvejdgtjzmgj"  # 你的API密钥
+TOKEN = "sk-xdewqafvtfsqxhvovpidjvygplxwsfqrntovkvejdgtjzmgj"  # 硅流API-Key密钥
 
 @app.route('/asr/stream', methods=['POST'])
 def asr_stream():
