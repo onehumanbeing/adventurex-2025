@@ -11,34 +11,60 @@ import RealityKitContent
 
 struct ContentView: View {
     @StateObject private var apiService = APIService.shared
+    @StateObject private var listeningViewModel = ListeningViewModel()
+    @State private var showWidgetGenerator = false
     
     var body: some View {
-        ZStack {
-            // Reality视图（完全透明，不添加任何3D内容）
-            RealityView { content in
-                // 不添加任何3D内容，保持完全透明
-            } update: { content in
-                // 更新逻辑
-            }
-            // UI控制层
-            VStack {
-                HStack {
-                    // 左上角控制面板
-                    controlPanel
-                    Spacer()
-                    // 右上角截图预览
-                    screenshotPreview
+        GeometryReader { geometry in
+            ZStack {
+                // Reality视图（完全透明，不添加任何3D内容）
+                RealityView { content in
+                    // 不添加任何3D内容，保持完全透明
+                } update: { content in
+                    // 更新逻辑
                 }
-                Spacer()
-                // 底部结果显示
-                HStack {
-                    // 左下角固定ListeningView
-                    ListeningPanel()
+                
+                // HTML Widgets渲染层
+                WidgetRenderView(screenSize: geometry.size)
+                
+                // UI控制层
+                VStack {
+                    HStack {
+                        // 左上角控制面板
+                        controlPanel
+                        Spacer()
+                        // 右上角截图预览
+                        screenshotPreview
+                    }
                     Spacer()
-                    resultView
+                    // 底部区域
+                    HStack {
+                        // 左下角固定ListeningView
+                        ListeningPanel(viewModel: listeningViewModel)
+                        Spacer()
+                        resultView
+                    }
+                }
+                .padding()
+                
+                // Widget生成面板（可显示/隐藏）
+                if showWidgetGenerator {
+                    VStack {
+                        HStack {
+                            Spacer()
+                            WidgetGeneratorPanel(
+                                apiService: apiService,
+                                listeningViewModel: listeningViewModel,
+                                showWidgetGenerator: $showWidgetGenerator
+                            )
+                        }
+                        Spacer()
+                    }
+                    .padding()
+                    .background(Color.black.opacity(0.3))
+                    .transition(.opacity.combined(with: .scale))
                 }
             }
-            .padding()
         }
     }
     
@@ -49,6 +75,7 @@ struct ContentView: View {
                 .font(.headline)
                 .foregroundColor(.white)
             
+            // 拍照分析按钮
             Button(action: {
                 captureAndAnalyze()
             }) {
@@ -68,7 +95,29 @@ struct ContentView: View {
             }
             .disabled(apiService.isLoading)
             
-            if apiService.isLoading {
+            // Widget生成按钮
+            Button(action: {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    showWidgetGenerator.toggle()
+                }
+            }) {
+                HStack {
+                    Image(systemName: "wand.and.stars")
+                        .foregroundColor(.white)
+                    Text("生成Widgets")
+                        .font(.caption)
+                        .foregroundColor(.white)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(Color.green.opacity(0.8))
+                )
+            }
+            .disabled(apiService.latestScreenshot == nil)
+            
+            if apiService.isLoading || apiService.isRenderingWidgets {
                 ProgressView()
                     .scaleEffect(0.8)
                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
@@ -128,7 +177,7 @@ struct ContentView: View {
         Group {
             if !apiService.responseText.isEmpty {
                 VStack(alignment: .trailing, spacing: 8) {
-                    Text("AI 视角:")
+                    Text("AI 反馈:")
                         .font(.caption)
                         .foregroundColor(.gray)
                     
@@ -170,13 +219,15 @@ struct ContentView: View {
 
 // 左下角固定ListeningView面板
 struct ListeningPanel: View {
+    @ObservedObject var viewModel: ListeningViewModel
     @State private var isListening = false
-    @StateObject private var viewModel = ListeningViewModel()
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Listening")
+            Text("语音助手")
                 .font(.headline)
                 .foregroundColor(.white)
+            
             Button(action: {
                 print("[ListeningPanel] Button tapped. isListening=\(isListening)")
                 if isListening {
@@ -202,11 +253,13 @@ struct ListeningPanel: View {
                         .fill(Color.purple.opacity(0.8))
                 )
             }
+            
             if isListening {
                 ProgressView()
                     .scaleEffect(0.8)
                     .progressViewStyle(CircularProgressViewStyle(tint: .white))
             }
+            
             if !viewModel.transcribedText.isEmpty {
                 ScrollView {
                     Text(viewModel.transcribedText)
@@ -215,8 +268,18 @@ struct ListeningPanel: View {
                         .padding(6)
                         .background(Color.black.opacity(0.3))
                         .cornerRadius(8)
+                        .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 .frame(height: 60)
+            }
+            
+            // 清除文本按钮
+            if !viewModel.transcribedText.isEmpty {
+                Button("清除文本") {
+                    viewModel.transcribedText = ""
+                }
+                .font(.caption2)
+                .foregroundColor(.orange)
             }
         }
         .padding()
@@ -227,6 +290,9 @@ struct ListeningPanel: View {
         .frame(width: 180)
         .padding(.bottom, 8)
         .padding(.leading, 8)
+        .onReceive(viewModel.$isListening) { listening in
+            isListening = listening
+        }
     }
 }
 

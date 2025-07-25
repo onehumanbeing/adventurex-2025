@@ -34,6 +34,11 @@ class ListeningViewModel: NSObject, ObservableObject, AVAudioRecorderDelegate {
         timer?.invalidate()
         sseTask?.cancel()
     }
+    
+    // 清除转录文本
+    func clearTranscribedText() {
+        transcribedText = ""
+    }
 
     private func requestMicPermissionAndStart() {
         audioSession.requestRecordPermission { [weak self] granted in
