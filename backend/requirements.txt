@@ -1,3 +1,4 @@
 flask
 pillow
 openai
+pydantic>=2.0

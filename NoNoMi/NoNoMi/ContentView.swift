@@ -20,7 +20,6 @@ struct ContentView: View {
             } update: { content in
                 // 更新逻辑
             }
-            
             // UI控制层
             VStack {
                 HStack {

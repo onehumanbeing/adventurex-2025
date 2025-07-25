@@ -1,4 +1,5 @@
 import os
+from pydantic import BaseModel
 from openai import OpenAI
 import traceback
 
@@ -39,6 +40,28 @@ def gpt_4o_mini(messages):
             "result": traceback.format_exc(),
             "estimated_cost": 0
         }
+
+# Call Schema 
+
+class HtmlView(BaseModel):
+    x: int
+    y: int
+    height: int
+    width: int
+    html: str
+
+class ViewRender(BaseModel): 
+    views: list[HtmlView]
+
+def call_openai_api(messages):
+    client = OpenAI()
+    completion = client.beta.chat.completions.parse(
+        model="gpt-4o-mini",
+        messages=messages,
+        response_format=ViewRender,
+    )
+    response = completion.choices[0].message.parsed
+    return [{"x": view.x, "y": view.y, "height": view.height, "width": view.width, "html": view.html} for view in response.views]
     
 if __name__ == "__main__":
     print(gpt_4o_mini([
