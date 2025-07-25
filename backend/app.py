@@ -1,13 +1,16 @@
+import os
 from flask import Flask, request, jsonify, Response, stream_with_context
 from agent import gpt_4o_mini, call_openai_api
-import os
 import requests
+
+from dotenv import load_dotenv
+load_dotenv() 
 
 app = Flask(__name__)
 
 SILICONFLOW_URL = "https://api.siliconflow.cn/v1/audio/transcriptions"
 MODEL = "FunAudioLLM/SenseVoiceSmall"
-TOKEN = "sk-xdewqafvtfsqxhvovpidjvygplxwsfqrntovkvejdgtjzmgj"  # 硅流API-Key密钥
+TOKEN = os.environ.get("SILICONFLOW_TOKEN")  # 从环境变量读取
 
 
 @app.route('/asr/stream', methods=['POST'])
