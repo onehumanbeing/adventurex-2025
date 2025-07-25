@@ -1,4 +1,3 @@
-import os
 from pydantic import BaseModel
 from openai import OpenAI
 import traceback
