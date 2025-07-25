@@ -1,11 +1,9 @@
 import SwiftUI
 import RealityKit
-
-#if os(iOS)
 import ARKit
-#endif
+import Combine
 
-// 相机视图，在iOS上使用ARKit获取真实相机帧，在visionOS上使用截图
+// 相机视图，在iOS上使用ARKit，在visionOS上使用Enterprise CameraFrameProvider获取真实相机帧
 struct ARCameraView: UIViewRepresentable {
     @Binding var latestFrame: UIImage?
     @ObservedObject var apiService: APIService
@@ -30,7 +28,7 @@ struct ARCameraView: UIViewRepresentable {
         
         return arView
         #else
-        // visionOS平台使用透明UIView，通过定时截图获取内容
+        // visionOS平台使用透明UIView，相机帧通过VisionOSCameraProvider获取
         print("[ARCameraView] 初始化UIView (visionOS)")
         let placeholderView = UIView()
         placeholderView.backgroundColor = UIColor.clear
@@ -48,50 +46,102 @@ struct ARCameraView: UIViewRepresentable {
     
     class Coordinator: NSObject {
         var parent: ARCameraView
-        private var frameUpdateTimer: Timer?
+        
+        #if !os(iOS)
+        // visionOS相机提供者
+        private var cameraProvider: AnyObject? // 可以是VisionOSCameraProvider或MockVisionOSCameraProvider
+        private var observationTask: Task<Void, Never>?
+        private var cancellables: Set<AnyCancellable> = []
+        #endif
         
         init(_ parent: ARCameraView) {
             self.parent = parent
             super.init()
             
             #if !os(iOS)
-            // visionOS上使用定时截图作为替代方案
-            print("[ARCameraView] 启动visionOS截图定时器")
-            startScreenshotTimer()
+            // visionOS上启动相机捕获
+            print("[ARCameraView] 启动visionOS相机捕获")
+            setupVisionOSCamera()
             #else
             print("[ARCameraView] 初始化iOS ARKit代理")
             #endif
         }
         
         #if !os(iOS)
-        // visionOS替代方案：定时截图
-        private func startScreenshotTimer() {
-            frameUpdateTimer = Timer.scheduledTimer(withTimeInterval: 0.3, repeats: true) { [weak self] _ in
-                DispatchQueue.main.async {
-                    self?.captureScreenshot()
+        private func setupVisionOSCamera() {
+            // 尝试使用真实的Enterprise Camera Provider
+            if #available(visionOS 1.0, *) {
+                // 检查是否支持CameraFrameProvider（需要Enterprise权限）
+                if CameraFrameProvider.isSupported {
+                    print("[ARCameraView] 使用Enterprise CameraFrameProvider")
+                    let provider = VisionOSCameraProvider()
+                    self.cameraProvider = provider
+                    
+                    // 观察相机帧更新
+                    observationTask = Task {
+                        await provider.startCameraCapture()
+                    }
+                    
+                    // 监听相机帧更新
+                    observeProviderUpdates(provider)
+                    
+                } else {
+                    print("[ARCameraView] CameraFrameProvider不支持，使用Mock Provider")
+                    setupMockCamera()
                 }
+            } else {
+                setupMockCamera()
             }
         }
         
-        private func captureScreenshot() {
-            guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-                  let window = windowScene.windows.first else {
-                print("[ARCameraView] 无法获取窗口场景")
-                return
+        private func setupMockCamera() {
+            let mockProvider = MockVisionOSCameraProvider()
+            self.cameraProvider = mockProvider
+            
+            observationTask = Task {
+                await mockProvider.startCameraCapture()
             }
             
-            let renderer = UIGraphicsImageRenderer(size: window.bounds.size)
-            let screenshot = renderer.image { context in
-                window.drawHierarchy(in: window.bounds, afterScreenUpdates: false)
-            }
-            
-            print("[ARCameraView] 截图成功，尺寸: \(screenshot.size)")
-            parent.latestFrame = screenshot
+            observeMockProviderUpdates(mockProvider)
+        }
+        
+        private func observeProviderUpdates(_ provider: VisionOSCameraProvider) {
+            // 使用Combine来观察相机帧更新
+            provider.$latestCameraFrame
+                .compactMap { $0 }
+                .sink { [weak self] frame in
+                    DispatchQueue.main.async {
+                        print("[ARCameraView] 收到Enterprise相机帧，尺寸: \(frame.size)")
+                        self?.parent.latestFrame = frame
+                    }
+                }
+                .store(in: &cancellables)
+        }
+        
+        private func observeMockProviderUpdates(_ provider: MockVisionOSCameraProvider) {
+            provider.$latestCameraFrame
+                .compactMap { $0 }
+                .sink { [weak self] frame in
+                    DispatchQueue.main.async {
+                        print("[ARCameraView] 收到Mock相机帧，尺寸: \(frame.size)")
+                        self?.parent.latestFrame = frame
+                    }
+                }
+                .store(in: &cancellables)
         }
         #endif
         
         deinit {
-            frameUpdateTimer?.invalidate()
+            #if !os(iOS)
+            observationTask?.cancel()
+            cancellables.removeAll()
+            
+            if let provider = cameraProvider as? VisionOSCameraProvider {
+                provider.stopCameraCapture()
+            } else if let mockProvider = cameraProvider as? MockVisionOSCameraProvider {
+                mockProvider.stopCameraCapture()
+            }
+            #endif
         }
     }
 }
@@ -107,7 +157,7 @@ extension ARCameraView.Coordinator: ARSessionDelegate {
         }
         
         DispatchQueue.main.async {
-            print("[ARCameraView] 获取到相机帧，尺寸: \(cameraImage.size)")
+            print("[ARCameraView] 获取到iOS相机帧，尺寸: \(cameraImage.size)")
             self.parent.latestFrame = cameraImage
         }
     }

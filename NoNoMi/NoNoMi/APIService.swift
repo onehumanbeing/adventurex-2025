@@ -86,7 +86,7 @@ class APIService: ObservableObject {
     }
     
     // 调用/agent API
-    func sendImageToAgent(image: UIImage, prompt: String = "you are a god and this is your view, reply in Chinese about what you thought, reply limit in 20-50 words in Chinese") {
+    func sendImageToAgent(image: UIImage, prompt: String = "你是一个AR助手，帮我观察生活的细节并且给出场景的应对建议，观察图片和场景文字（语音）, reply in Chinese about what you thought, reply limit in 20-50 words in Chinese") {
         // 存储最新截图
         latestScreenshot = image
         

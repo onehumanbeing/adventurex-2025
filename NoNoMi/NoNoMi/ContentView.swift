@@ -12,7 +12,7 @@ struct ContentView: View {
     var body: some View {
         GeometryReader { geometry in
             ZStack {
-                // 相机视图（支持iOS ARKit和visionOS截图）
+                // 相机视图（支持iOS ARKit和visionOS CameraFrameProvider）
                 ARCameraView(latestFrame: $currentCameraImage, apiService: apiService)
                     .background(Color.clear)
                     .onChange(of: currentCameraImage) { oldValue, newValue in
@@ -83,8 +83,8 @@ struct ContentView: View {
             // 相机状态指示
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
-                    Image(systemName: currentCameraImage != nil ? "camera.fill" : "camera.circle")
-                        .foregroundColor(currentCameraImage != nil ? .green : .orange)
+                    Image(systemName: getCameraIcon())
+                        .foregroundColor(getCameraColor())
                     Text(getCameraStatusText())
                         .font(.caption2)
                         .foregroundColor(.white)
@@ -95,6 +95,11 @@ struct ContentView: View {
                         .font(.caption2)
                         .foregroundColor(.gray)
                 }
+                
+                // 显示相机类型
+                Text(getCameraTypeText())
+                    .font(.caption2)
+                    .foregroundColor(.orange)
             }
             .shadow(color: .black, radius: 1, x: 1, y: 1)
             
@@ -154,12 +159,47 @@ struct ContentView: View {
                 .fill(Color.black.opacity(0.3)) // 大幅降低不透明度
                 .blur(radius: 10) // 添加模糊效果
         )
-        .frame(width: 180)
+        .frame(width: 200)
         .onTapGesture {
             // 备用手势：点击控制面板触发
             if !apiService.isLoading {
                 captureAndAnalyze()
             }
+        }
+    }
+    
+    // 获取相机图标
+    private func getCameraIcon() -> String {
+        if currentCameraImage != nil {
+            #if os(iOS)
+            return "camera.fill"
+            #else
+            // 检查是否是Mock模式
+            if isMockMode() {
+                return "camera.circle.fill"
+            } else {
+                return "camera.fill"
+            }
+            #endif
+        } else {
+            return "camera.circle"
+        }
+    }
+    
+    // 获取相机颜色
+    private func getCameraColor() -> Color {
+        if currentCameraImage != nil {
+            #if os(iOS)
+            return .green
+            #else
+            if isMockMode() {
+                return .yellow
+            } else {
+                return .green
+            }
+            #endif
+        } else {
+            return .red
         }
     }
     
@@ -169,11 +209,35 @@ struct ContentView: View {
             #if os(iOS)
             return "ARKit相机就绪"
             #else
-            return "截图模式就绪"
+            if isMockMode() {
+                return "模拟相机就绪"
+            } else {
+                return "Enterprise相机就绪"
+            }
             #endif
         } else {
             return "等待相机..."
         }
+    }
+    
+    // 获取相机类型文本
+    private func getCameraTypeText() -> String {
+        #if os(iOS)
+        return "iOS ARKit"
+        #else
+        if isMockMode() {
+            return "visionOS Mock"
+        } else {
+            return "visionOS Enterprise"
+        }
+        #endif
+    }
+    
+    // 检查是否是Mock模式（通过图像内容检测）
+    private func isMockMode() -> Bool {
+        // 简单的启发式检测：如果图像包含文本"Mock"则是Mock模式
+        // 实际应用中可以通过更复杂的方式检测
+        return true // 暂时返回true，因为大多数情况下会是Mock模式
     }
     
     // 截图预览（右上角）- 透明背景
