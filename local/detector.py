@@ -37,8 +37,47 @@ def update_status_json(qr_content: str):
         # 更新action和value字段，更新时间戳
         status_data["action"] = "qr"
         status_data["value"] = qr_content
+        status_data["voice"] = 'https://helped-monthly-alpaca.ngrok-free.app/voice/qr.mp3'
         status_data["timestamp"] = int(time.time())
-        
+        # 如果是 https 链接，获取网页内容并用 GPT 总结
+        if isinstance(qr_content, str) and qr_content.startswith("https://"):
+            try:
+                print(f"获取网页内容: {qr_content}")
+                import requests
+                from openai import OpenAI
+
+                # 获取网页内容
+                resp = requests.get(qr_content, timeout=5)
+                html_text = resp.text
+
+                # 只取前4096字符，避免太长
+                # html_text = html_text[:4096]
+
+                # 构造 prompt
+                prompt = [
+                    {
+                        "role": "system",
+                        "content": "你是一个网页摘要助手，请用中文50字以内总结用户提供的网页内容。你不可以使用专业的计算机网络术语，以对待用户方式回答。如果没有有意义的内容，你可以回复 无摘要 "
+                    },
+                    {
+                        "role": "user",
+                        "content": f"请总结以下网页内容：\n{html_text}"
+                    }
+                ]
+
+                # 调用 OpenAI GPT-4o
+                client = OpenAI(timeout=20.0)
+                completion = client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=prompt,
+                    max_tokens=10000,
+                )
+                summary = completion.choices[0].message.content.strip()
+                if summary:
+                    status_data["danmu_text"] = summary
+                    print(f"GPT总结: {summary}")
+            except Exception as e:
+                print(f"获取网页内容或GPT总结失败: {e}")
         # 保存更新后的文件
         with open(status_file, 'w', encoding='utf-8') as f:
             json.dump(status_data, f, ensure_ascii=False, indent=4)
@@ -128,6 +167,7 @@ def analyze_image(image_path: str) -> bool:
         print(f"在图片 {os.path.basename(image_path)} 中检测到 {len(qr_contents)} 个二维码:")
         for i, content in enumerate(qr_contents, 1):
             print(f"  二维码 {i}: {content}")
+            
         return True
     else:
         print(f"图片 {os.path.basename(image_path)} 中未检测到二维码")

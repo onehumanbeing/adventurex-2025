@@ -13,18 +13,6 @@ struct DanmuView: View {
     
     var body: some View {
         HStack(alignment: .top, spacing: 20) {
-            // 左侧：Logo
-            AsyncImage(url: URL(string: "https://helped-monthly-alpaca.ngrok-free.app/logo.png")) { image in
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 120, height: 120)
-            } placeholder: {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(width: 120, height: 120)
-            }
-            
             // 右侧：文字和音波
             VStack(alignment: .trailing, spacing: 12) {
                 // 右上角：音波动画
@@ -58,21 +46,33 @@ struct DanmuView: View {
                 
                 // 下方：文字内容
                 Text(text)
-                    .font(.system(size: 39))
+                    .font(.system(size: 54)) // 增加字体大小 (45 * 1.2)
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.trailing)
                     .lineLimit(3)
                     .transition(.opacity.combined(with: .move(edge: .trailing)))
                     .animation(.easeInOut(duration: 0.5), value: text)
             }
+            
+            // 左侧：Logo - 移到右边，避免遮挡主视角
+            AsyncImage(url: URL(string: "https://helped-monthly-alpaca.ngrok-free.app/logo.png")) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 168, height: 168) // 增加logo尺寸 (140 * 1.2)
+            } placeholder: {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: 168, height: 168) // 增加占位符尺寸 (140 * 1.2)
+            }
         }
-        .padding(36)
+        .padding(48) // 增加内边距 (40 * 1.2)
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(.ultraThinMaterial)
                 .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
         )
-        .frame(maxWidth: 750)
+        .frame(maxWidth: 1020) // 增加最大宽度 (850 * 1.2)
     }
 }
 

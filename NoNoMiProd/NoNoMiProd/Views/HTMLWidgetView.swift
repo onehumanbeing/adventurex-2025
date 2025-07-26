@@ -15,8 +15,8 @@ struct HTMLWidgetView: View {
     
     // 将API返回的像素尺寸转换为SwiftUI的尺寸
     private var widgetSize: CGSize {
-        // 放大3倍，让HTML Widget在真机上更清晰
-        let scale: CGFloat = 0.9 // 放大3倍
+        // 调整缩放比例，让HTML Widget在右侧显示时更合适
+        let scale: CGFloat = 1.08 // 调整为1.08 (0.9 * 1.2)，让HTML Widget更大更清晰
         return CGSize(
             width: CGFloat(width) * scale,
             height: CGFloat(height) * scale
@@ -26,9 +26,9 @@ struct HTMLWidgetView: View {
     var body: some View {
         WebView(html: html)
             .frame(width: widgetSize.width, height: widgetSize.height)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .clipShape(RoundedRectangle(cornerRadius: 12)) // 增加圆角
             .background(
-                RoundedRectangle(cornerRadius: 12)
+                RoundedRectangle(cornerRadius: 16) // 增加背景圆角
                     .fill(.ultraThinMaterial)
                     .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
             )
@@ -45,10 +45,10 @@ struct WebView: UIViewRepresentable {
         webView.scrollView.backgroundColor = UIColor.clear
         webView.scrollView.isScrollEnabled = false
         
-        // 注入CSS来放大内容6倍（在3倍基础上再放大2倍）
+        // 注入CSS来调整内容缩放
         let scriptSource = """
         var style = document.createElement('style');
-        style.innerHTML = 'body { transform: scale(3); transform-origin: top left; }';
+        style.innerHTML = 'body { transform: scale(2.5); transform-origin: top left; }'; // 调整缩放比例
         document.head.appendChild(style);
         """
         let userScript = WKUserScript(source: scriptSource, injectionTime: .atDocumentEnd, forMainFrameOnly: true)

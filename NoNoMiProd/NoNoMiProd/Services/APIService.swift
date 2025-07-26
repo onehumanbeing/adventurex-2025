@@ -78,11 +78,13 @@ class APIService: ObservableObject {
                     
                     // 检查时间戳，只处理新的数据
                     if status.timestamp > self?.lastTimestamp ?? 0 {
+                        print("APIService: 时间戳更新，更新状态数据")
+                        print("APIService: 新数据详情 - voice: \(status.voice), danmu_text: \(status.danmu_text)")
                         self?.lastTimestamp = status.timestamp
                         self?.currentStatus = status
-                        print("APIService: 更新状态数据")
+                        print("APIService: 状态数据已更新")
                     } else {
-                        print("APIService: 时间戳未更新，忽略数据")
+                        print("APIService: 时间戳未更新，忽略数据 (当前: \(status.timestamp), 上次: \(self?.lastTimestamp ?? 0))")
                     }
                 } catch {
                     self?.error = "Failed to decode data: \(error.localizedDescription)"

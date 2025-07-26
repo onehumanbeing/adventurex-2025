@@ -13,20 +13,26 @@ class AudioPlayer: NSObject, ObservableObject {
     @Published var isPlaying = false
     
     func playAudio(from urlString: String) {
+        print("AudioPlayer: 开始播放音频 - \(urlString)")
+        
         guard let url = URL(string: urlString) else {
-            print("Invalid audio URL")
+            print("AudioPlayer: 无效的音频URL - \(urlString)")
             return
         }
         
         // 停止当前播放
         stopAudio()
         
+        print("AudioPlayer: 开始下载音频...")
+        
         // 下载并播放音频
         URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
             guard let data = data, error == nil else {
-                print("Failed to download audio: \(error?.localizedDescription ?? "Unknown error")")
+                print("AudioPlayer: 下载音频失败 - \(error?.localizedDescription ?? "Unknown error")")
                 return
             }
+            
+            print("AudioPlayer: 音频下载成功，数据大小: \(data.count) bytes")
             
             DispatchQueue.main.async {
                 do {
@@ -34,8 +40,9 @@ class AudioPlayer: NSObject, ObservableObject {
                     self?.audioPlayer?.delegate = self
                     self?.audioPlayer?.play()
                     self?.isPlaying = true
+                    print("AudioPlayer: 音频开始播放")
                 } catch {
-                    print("Failed to play audio: \(error.localizedDescription)")
+                    print("AudioPlayer: 播放音频失败 - \(error.localizedDescription)")
                 }
             }
         }.resume()
@@ -43,10 +50,12 @@ class AudioPlayer: NSObject, ObservableObject {
     
     // 自动播放音频
     func autoPlayAudio(from urlString: String) {
+        print("AudioPlayer: 自动播放音频 - \(urlString)")
         playAudio(from: urlString)
     }
     
     func stopAudio() {
+        print("AudioPlayer: 停止音频播放")
         audioPlayer?.stop()
         audioPlayer = nil
         isPlaying = false
@@ -55,6 +64,7 @@ class AudioPlayer: NSObject, ObservableObject {
 
 extension AudioPlayer: AVAudioPlayerDelegate {
     func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        print("AudioPlayer: 音频播放完成 - 成功: \(flag)")
         DispatchQueue.main.async {
             self.isPlaying = false
         }

@@ -16,17 +16,17 @@ class HtmlView(BaseModel):
     html: str
     danmu_text: str
 
-def call_openai_api(messages):
+def call_openai_api(messages, response_format=HtmlView, model="gpt-4o-mini"):
     client = OpenAI(timeout=30.0)  # 设置30秒超时
     try:
         completion = client.beta.chat.completions.parse(
-            model="gpt-4o-mini",
+            model=model,
             messages=messages,
-            response_format=HtmlView,
+            response_format=response_format,
             max_tokens=10000,
         )
         response = completion.choices[0].message.parsed
-        return response
+        return response, None
     except Exception as e:
         print(f"OpenAI API调用失败: {e}")
         # 返回默认响应
@@ -35,10 +35,28 @@ def call_openai_api(messages):
             width=600,
             html="<div style='padding: 16px; background-color: white; border-radius: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); color: #007aff;'><h2 style='font-size: 20px; font-weight: bold; margin-bottom: 8px;'>系统提示</h2><p style='margin-bottom: 16px;'>网络连接超时，请稍后重试。</p></div>",
             danmu_text="网络连接超时"
-        )
+        ), e
+
+def update_status_json(fields: dict):
+    status_path = "cache/status.json"
+    # 先读取
+    if os.path.exists(status_path):
+        try:
+            with open(status_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except Exception as e:
+            print(f"读取status.json失败: {e}")
+            data = {}
+    else:
+        data = {}
+    # 覆盖字段
+    data.update(fields)
+    # 保存
+    with open(status_path, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
 
 def reset_status():
-    data = {
+    fields = {
         "action": "nonomi",
         "value": "",
         "voice": "https://helped-monthly-alpaca.ngrok-free.app/voice/hello.mp3",
@@ -48,8 +66,7 @@ def reset_status():
         "height": 400,
         "width": 600
     }
-    with open("cache/status.json", "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
+    update_status_json(fields)
 
 def periodic_ai_task():
     reset_status()
@@ -64,6 +81,7 @@ def periodic_ai_task():
         IMAGE_DIR = os.path.join(".", "cache", "screenshot")
     AUDIO_TXT_PATH = os.path.join(".", "cache", "audio", "audio.txt")
     PROMPT_PATH = os.path.join(".", "prompt.txt")
+    PROMPT_IMAGE_PATH = os.path.join(".", "prompt_image.txt")
 
     while True:
         # 1. 获取最新的图片
@@ -107,29 +125,79 @@ def periodic_ai_task():
             print(f"读取prompt.txt失败: {e}")
             system_prompt = ""
 
-        # 4. 组装messages
+        # 3.1 读取prompt_image.txt
+        try:
+            with open(PROMPT_IMAGE_PATH, "r", encoding="utf-8") as f:
+                prompt_image = f.read().strip()
+        except Exception as e:
+            print(f"读取prompt_image.txt失败: {e}")
+            prompt_image = ""
+
+        # 4. 先用prompt_image.txt分析图片内容
+        screen_description = None
+        image_analysis_error = False
+        t1 = time.time()
+        if prompt_image and image_messages:
+            image_analysis_messages = [
+                {"role": "system", "content": prompt_image},
+                {"role": "user", "content": image_messages}
+            ]
+            print("开始图片细节分析请求")
+            try:
+                # 只要文本，不需要结构化
+                response, err = call_openai_api(
+                    image_analysis_messages,
+                    response_format="text"
+                )
+                t2 = time.time()
+                print(f"图片细节分析耗时: {t2-t1:.2f}秒")
+                if err is not None:
+                    print("图片细节分析请求异常:", err)
+                    image_analysis_error = True
+                elif isinstance(response, str):
+                    screen_description = response
+                elif hasattr(response, "content"):
+                    screen_description = getattr(response, "content", None)
+                else:
+                    screen_description = str(response)
+            except Exception as e:
+                t2 = time.time()
+                print(f"图片细节分析请求异常: {e}")
+                print(f"图片细节分析耗时: {t2-t1:.2f}秒")
+                image_analysis_error = True
+        else:
+            t2 = time.time()
+            print("未能进行图片细节分析（缺少prompt_image或图片）")
+            image_analysis_error = True
+
+        # 5. 组装主请求messages
         messages = []
         if system_prompt:
             messages.append({"role": "system", "content": system_prompt})
         if audio_content:
             messages.append({"role": "user", "content": audio_content})
-        if image_messages:
-            messages.append({
-                "role": "user",
-                "content": image_messages
-            })
+        # 只在图片分析没出错时，才传递图片信息
+        if not image_analysis_error and screen_description:
+            messages.append({"role": "user", "content": f"screen_description: {screen_description}"})
+            # 也可以选择是否还传图片，按需求，这里假设不再传图片
+        else:
+            print("图片分析失败，不传递图片信息给主请求。")
+        # 如果没有screen_description且图片分析失败，可以选择是否还传图片，这里按要求不传
         if not messages:
             print("没有可用的输入，跳过本次调用。")
             time.sleep(AI_TIME_INTERVAL)
             continue
-        # INSERT_YOUR_CODE
+
         print("本次处理的图片路径:", latest_images)
-        # 5. 调用OpenAI
+        # 6. 调用OpenAI主请求
+        t3 = time.time()
         try:
-            result = call_openai_api(messages)
+            result, err = call_openai_api(messages)
+            t4 = time.time()
+            print(f"主请求耗时: {t4-t3:.2f}秒")
             print("AI HTML结果:", result)
-            # 6. 调用minimax
-            if result.danmu_text != "":
+            # 7. 调用minimax
+            if hasattr(result, "danmu_text") and result.danmu_text != "":
                 audio = t2a_minimax(result.danmu_text)
                 with open(f"cache/voice/{current_timestamp}.mp3", "wb") as f:
                     f.write(audio)
@@ -137,30 +205,28 @@ def periodic_ai_task():
                 print("minimax结果:", route)
             else:
                 route = ""
-            data = {
+            fields = {
                 "voice": "" if route == "" else f"{HOST_URL}{route}",
                 "timestamp": current_timestamp,
-                "html": result.html,
-                "danmu_text": result.danmu_text,
-                "height": result.height,
-                "width": result.width
+                "html": getattr(result, "html", ""),
+                "danmu_text": getattr(result, "danmu_text", ""),
+                "height": getattr(result, "height", 400),
+                "width": getattr(result, "width", 600)
             }
-            print("data:", data)
-            with open("cache/status.json", "w", encoding="utf-8") as f:
-                json.dump(data, f, ensure_ascii=False, indent=4)
-            # INSERT_YOUR_CODE
-            # 在 ./cache/html 里保存 .html，用timestamp命名
+            print("data:", fields)
+            update_status_json(fields)
+            # 8. 保存HTML
             html_dir = os.path.join(".", "cache", "html")
             os.makedirs(html_dir, exist_ok=True)
             timestamp = int(time.time())
             html_path = os.path.join(html_dir, f"{timestamp}.html")
-            # result 可能是一个列表，每个元素是一个 dict，包含 html 字段
-            # 只保存第一个 html 字段内容
             html_content = ""
             if isinstance(result, list) and result:
                 html_content = result[0].get("html", "")
             elif isinstance(result, dict) and "html" in result:
                 html_content = result["html"]
+            elif hasattr(result, "html"):
+                html_content = result.html
             with open(html_path, "w", encoding="utf-8") as f:
                 f.write(html_content)
             print(f"HTML已保存到: {html_path}")
@@ -179,7 +245,9 @@ def periodic_ai_task():
                 except Exception as e:
                     print(f"删除audio.txt失败: {AUDIO_TXT_PATH}, {e}")
         except Exception as e:
-            print("调用OpenAI失败:", e)
+            t4 = time.time()
+            print(f"主请求异常: {e}")
+            print(f"主请求耗时: {t4-t3:.2f}秒")
             traceback.print_exc()
         brain_loop = int(os.environ.get("BRAIN_LOOP", 0))
         if brain_loop == 1:

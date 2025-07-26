@@ -19,18 +19,20 @@ struct ContentView: View {
         ZStack {
             // 移除背景3D场景，让用户有更大的视野
             
-            // 左侧紧凑布局：所有视图都在左边
-            VStack(alignment: .leading, spacing: 12) {
-                // 状态指示器
+            // 调整布局：将UI移到更靠近中心的位置
+            VStack(alignment: .trailing, spacing: 20) { // 增加间距
+                // 状态指示器 - 移到右上角但不要太靠右
                 HStack {
+                    Spacer()
+                    
                     StatusIndicatorView(apiService: apiService)
                         .transition(.opacity.combined(with: .scale))
-                    
-                    Spacer()
                 }
                 
-                // HTML内容
+                // HTML内容 - 移到右边但不要太靠右
                 HStack {
+                    Spacer()
+                    
                     if let status = apiService.currentStatus {
                         HTMLWidgetView(
                             html: status.html,
@@ -42,25 +44,25 @@ struct ContentView: View {
                         // 显示占位符
                         VStack {
                             Image(systemName: "doc.text")
-                                .font(.system(size: 20))
+                                .font(.system(size: 29)) // 增加图标尺寸 (24 * 1.2)
                                 .foregroundColor(.secondary)
                             Text("等待数据...")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
-                        .frame(width: 200, height: 150)
+                        .frame(width: 300, height: 216) // 增加占位符尺寸 (250 * 1.2, 180 * 1.2)
                         .background(
                             RoundedRectangle(cornerRadius: 12)
                                 .fill(.ultraThinMaterial)
                         )
                         .opacity(0.7)
                     }
-                    
-                    Spacer()
                 }
                 
-                // NoNomi（包含音波动画）
+                // NoNomi（包含音波动画）- 移到右边但不要太靠右
                 HStack {
+                    Spacer()
+                    
                     if let status = apiService.currentStatus {
                         DanmuView(text: status.danmu_text, audioPlayer: audioPlayer)
                             .transition(.opacity.combined(with: .scale))
@@ -69,33 +71,24 @@ struct ContentView: View {
                         DanmuView(text: "正在连接服务器...", audioPlayer: audioPlayer)
                             .opacity(0.7)
                     }
-                    
-                    Spacer()
                 }
                 
-                Spacer()
-            }
-            .padding(.top, 20)
-            .padding(.leading, 20)
-            .padding(.trailing, 20)
-            
-            // 二维码WebView - 显示在右侧
-            if showQRWebView && !qrURL.isEmpty {
-                VStack {
-                    Spacer()
-                    
+                // 二维码WebView - 严格显示在Danmu text下面
+                if showQRWebView && !qrURL.isEmpty {
                     HStack {
                         Spacer()
                         
                         QRWebView(url: qrURL, isVisible: $showQRWebView)
-                            .padding(.trailing, 20)
                     }
-                    
-                    Spacer()
                 }
+                
+                Spacer()
             }
+            .padding(.top, 40) // 增加顶部间距
+            .padding(.leading, 40) // 进一步减少左边距，让UI更靠近中心
+            .padding(.trailing, 70) // 增加右边距，平衡布局
             
-            // 错误信息显示
+            // 错误信息显示 - 也移到右边
             if let error = apiService.error {
                 VStack {
                     Spacer()
@@ -140,7 +133,15 @@ struct ContentView: View {
             // 当有新数据时自动播放音频
             if let status = newStatus {
                 print("检测到新数据，自动播放音频...")
-                audioPlayer.autoPlayAudio(from: status.voice)
+                print("新状态详情: timestamp=\(status.timestamp), voice=\(status.voice), action=\(status.action)")
+                
+                // 检查voice URL是否有效
+                if !status.voice.isEmpty {
+                    print("开始播放音频: \(status.voice)")
+                    audioPlayer.autoPlayAudio(from: status.voice)
+                } else {
+                    print("警告: voice URL为空，跳过音频播放")
+                }
                 
                 // 检查是否为二维码action
                 if status.action == "qr", let qrValue = status.value {
@@ -157,6 +158,8 @@ struct ContentView: View {
                         }
                     }
                 }
+            } else {
+                print("状态数据为空")
             }
         }
         .onDisappear {

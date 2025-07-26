@@ -54,7 +54,7 @@ def poll_and_transcribe_audio_dir(poll_interval=2):
                 # 追加写入识别结果到audio.txt
                 try:
                     with open(AUDIO_TXT_PATH, "a+", encoding="utf-8") as f:
-                        f.write(f"{fname}: {result}\n")
+                        f.write(f"{result}\n")
                 except Exception as e:
                     print(f"写入audio.txt时出错: {e}")
                 processed_files.add(fname)
