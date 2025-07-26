@@ -1,8 +1,3 @@
-#!/usr/bin/env python3
-"""
-测试二维码检测功能
-"""
-
 import os
 import json
 import time

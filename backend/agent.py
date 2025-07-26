@@ -1,8 +1,23 @@
 from pydantic import BaseModel
 from openai import OpenAI
 import traceback
+import os
+import uuid
+from datetime import datetime
 
-def gpt_4o_mini(messages):
+# 添加LocalTracer导入
+import sys
+sys.path.append('../local')
+from local_tracer import LocalTracer
+
+# 初始化LocalTracer
+tracer = LocalTracer(storage_path="./logs")
+
+def gpt_4o_mini(messages, thread_id=None):
+    # 如果没有提供thread_id，生成一个基于时间的唯一ID
+    if thread_id is None:
+        thread_id = f"thread_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+    
     # 参考 https://openai.com/api/pricing/
     """
     messages=[
@@ -17,9 +32,15 @@ def gpt_4o_mini(messages):
     """
     client = OpenAI()
     try:
+        # 使用LocalTracer作为回调
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,
+            # 添加回调处理器
+            extra_headers={
+                "langchain_callback_handlers": [tracer],
+                "langchain_metadata": {"thread_id": thread_id}
+            }
             # max_tokens=10
         )
         # gpt-4o-mini
@@ -30,14 +51,16 @@ def gpt_4o_mini(messages):
         return {
             "status": 0,
             "result": reply,
-            "estimated_cost": estimated_cost
+            "estimated_cost": estimated_cost,
+            "thread_id": thread_id
         }
     except Exception as e:
         print(f"Error: {str(e)}")
         return {
             "status": -1,
             "result": traceback.format_exc(),
-            "estimated_cost": 0
+            "estimated_cost": 0,
+            "thread_id": thread_id
         }
 
 # Call Schema 
@@ -52,12 +75,21 @@ class HtmlView(BaseModel):
 class ViewRender(BaseModel): 
     views: list[HtmlView]
 
-def call_openai_api(messages):
+def call_openai_api(messages, thread_id=None):
+    # 如果没有提供thread_id，生成一个基于时间的唯一ID
+    if thread_id is None:
+        thread_id = f"thread_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+    
     client = OpenAI()
     completion = client.beta.chat.completions.parse(
         model="gpt-4o-mini",
         messages=messages,
         response_format=ViewRender,
+        # 添加回调处理器
+        extra_headers={
+            "langchain_callback_handlers": [tracer],
+            "langchain_metadata": {"thread_id": thread_id}
+        }
     )
     response = completion.choices[0].message.parsed
     return [{"x": view.x, "y": view.y, "height": view.height, "width": view.width, "html": view.html} for view in response.views]

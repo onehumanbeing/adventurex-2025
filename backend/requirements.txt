@@ -2,5 +2,5 @@ flask
 pillow
 openai
 pydantic>=2.0
-requests
-dotenv
+langchain
+langchain-core

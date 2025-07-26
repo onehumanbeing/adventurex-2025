@@ -14,7 +14,10 @@ def render():
     messages = request.json.get('messages')
     if not messages:
         return jsonify({"error": "No messages provided"}), 400
-    return jsonify(call_openai_api(messages))
+    
+    # 从请求中获取thread_id，如果没有则使用None（会自动生成）
+    thread_id = request.json.get('thread_id')
+    return jsonify(call_openai_api(messages, thread_id))
 
 @app.route('/agent', methods=['POST'])
 def agent():
@@ -27,7 +30,10 @@ def agent():
     messages = request.json.get('messages')
     if not messages:
         return jsonify({"error": "No messages provided"}), 400
-    return jsonify(gpt_4o_mini(messages))
+    
+    # 从请求中获取thread_id，如果没有则使用None（会自动生成）
+    thread_id = request.json.get('thread_id')
+    return jsonify(gpt_4o_mini(messages, thread_id))
 
 @app.route('/', methods=['GET'])
 def index():

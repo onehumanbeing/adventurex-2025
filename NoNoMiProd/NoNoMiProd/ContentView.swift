@@ -130,21 +130,46 @@ struct ContentView: View {
             apiService.startPolling()
         }
         .onChange(of: apiService.currentStatus) { newStatus in
-            // 当有新数据时自动播放音频
+            // 当有新数据时处理不同action
             if let status = newStatus {
-                print("检测到新数据，自动播放音频...")
+                print("检测到新数据...")
                 print("新状态详情: timestamp=\(status.timestamp), voice=\(status.voice), action=\(status.action)")
                 
-                // 检查voice URL是否有效
-                if !status.voice.isEmpty {
-                    print("开始播放音频: \(status.voice)")
-                    audioPlayer.autoPlayAudio(from: status.voice)
-                } else {
-                    print("警告: voice URL为空，跳过音频播放")
+                // 检查是否为pending action
+                if status.action == "pending" {
+                    print("检测到pending action，播放pending音频...")
+                    if !status.voice.isEmpty {
+                        print("播放pending音频: \(status.voice)")
+                        audioPlayer.autoPlayAudio(from: status.voice)
+                    } else {
+                        print("警告: pending action的voice URL为空")
+                    }
                 }
-                
+                // 检查是否为render action（正常完整渲染）
+                else if status.action == "render" {
+                    print("检测到render action，执行完整渲染...")
+                    // 播放语音
+                    if !status.voice.isEmpty {
+                        print("播放render音频: \(status.voice)")
+                        audioPlayer.autoPlayAudio(from: status.voice)
+                    } else {
+                        print("警告: render action的voice URL为空")
+                    }
+                    // Danmu和HTML Widget会自动重新渲染，因为它们绑定到status数据
+                    print("Danmu和HTML Widget已重新渲染")
+                }
+                // 其他action或无action时，也播放语音（兼容性处理）
+                else {
+                    print("检测到其他action或无action，播放音频...")
+                    if !status.voice.isEmpty {
+                        print("开始播放音频: \(status.voice)")
+                        audioPlayer.autoPlayAudio(from: status.voice)
+                    } else {
+                        print("警告: voice URL为空，跳过音频播放")
+                    }
+                }
                 // 检查是否为二维码action
-                if status.action == "qr", let qrValue = status.value {
+                else if status.action == "qr", let qrValue = status.value {
                     print("检测到二维码action，显示WebView...")
                     qrURL = qrValue
                     withAnimation(.easeInOut(duration: 0.3)) {
