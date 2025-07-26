@@ -1,13 +1,3 @@
-"""
-音频转写模块 - 负责将音频文件转换为文字
-
-主要功能：
-1. 监控音频目录中的新文件
-2. 调用SiliconFlow API进行语音转文字
-3. 将转写结果保存到audio.txt文件
-4. 自动清理已处理的音频文件
-"""
-
 import os
 import time
 import requests

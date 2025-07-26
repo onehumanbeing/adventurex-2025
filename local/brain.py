@@ -1,13 +1,3 @@
-"""
-AI大脑模块 - 负责处理图像识别、语音转文字和AI对话的核心逻辑
-
-主要功能：
-1. 调用OpenAI API进行图像和语音分析
-2. 生成HTML界面和弹幕文本
-3. 调用语音合成API生成音频
-4. 管理状态文件和缓存
-"""
-
 from pydantic import BaseModel
 from openai import OpenAI
 import traceback

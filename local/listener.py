@@ -1,13 +1,3 @@
-"""
-音频录制模块 - 负责录制麦克风音频
-
-主要功能：
-1. 使用麦克风录制音频
-2. 将音频保存为WAV格式
-3. 支持连续录制和定时录制
-4. 可选的音频转文字功能
-"""
-
 import os
 import time
 import sounddevice as sd
