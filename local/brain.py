@@ -267,7 +267,7 @@ def reset_status():
             <div style="width: 48px; height: 48px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
               <span style="font-size: 32px;">🎧</span>
             </div>
-            <div style="color: #fff; font-size: 18px; font-weight: 700; margin-top: 4px; font-family: sans-serif;">NoNomi</div>
+            <div style="color: #fff; font-size: 18px; font-weight: 700; margin-top: 4px; font-family: sans-serif;">NoNomi AI Assistant</div>
           </div>
         </div>
       </div>
