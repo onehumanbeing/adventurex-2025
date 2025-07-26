@@ -31,12 +31,19 @@ def transcribe_audio(filename):
         }
         data = {'model': MODEL}
         headers = {"Authorization": f"Bearer {TOKEN}"}
-        resp = requests.post(SILICONFLOW_URL, files=files, data=data, headers=headers)
         try:
-            text = resp.json().get('text', '')
-        except Exception:
-            text = resp.text
-        return text
+            resp = requests.post(SILICONFLOW_URL, files=files, data=data, headers=headers, timeout=30)
+            try:
+                text = resp.json().get('text', '')
+            except Exception:
+                text = resp.text
+            return text
+        except requests.exceptions.Timeout:
+            print(f"转写超时: {filename}")
+            return ""
+        except requests.exceptions.RequestException as e:
+            print(f"转写请求失败: {filename}, {e}")
+            return ""
 
 def main():
     timestamp = int(time.time())
@@ -47,7 +54,14 @@ def main():
 
 def periodic_main_call():
     while True:
-        main()
+        try:
+            main()
+        except KeyboardInterrupt:
+            print("录音进程被中断")
+            break
+        except Exception as e:
+            print(f"录音进程出错: {e}")
+            time.sleep(1)  # 出错后等待1秒再继续
 
 if __name__ == "__main__":
     periodic_main_call()

@@ -4,14 +4,24 @@ import os
 import time
 import threading
 
+# 定义不同脚本对应的颜色
+SCRIPT_COLORS = {
+    "brain.py": "\033[96m",      # 青色
+    "listener.py": "\033[92m",   # 绿色
+    "screenshot.py": "\033[93m", # 黄色
+    "transcribe.py": "\033[95m", # 紫色
+}
+RESET_COLOR = "\033[0m"
+
 def stream_subprocess_output(process, name):
-    # 实时读取子进程的stdout和stderr并打印
+    # 选择颜色
+    color = SCRIPT_COLORS.get(name, "\033[97m")  # 默认白色
     def stream(pipe, prefix):
         for line in iter(pipe.readline, b''):
             try:
-                print(f"[{name}] {line.decode(errors='replace')}", end='', flush=True)
+                print(f"{color}[{name}] {line.decode(errors='replace')}{RESET_COLOR}", end='', flush=True)
             except Exception as e:
-                print(f"[{name}] (decode error) {line!r}", flush=True)
+                print(f"{color}[{name}] (decode error) {line!r}{RESET_COLOR}", flush=True)
         pipe.close()
     threading.Thread(target=stream, args=(process.stdout, "stdout"), daemon=True).start()
     threading.Thread(target=stream, args=(process.stderr, "stderr"), daemon=True).start()
@@ -39,7 +49,7 @@ if __name__ == "__main__":
         if not os.path.exists(script_path):
             print(f"未找到脚本: {script_path}")
             continue
-        print(f"启动: {script_path}")
+        print(f"{SCRIPT_COLORS.get(script, '')}启动: {script_path}{RESET_COLOR}")
         p = run_script(script_path)
         stream_subprocess_output(p, script)
         processes.append(p)
@@ -50,9 +60,16 @@ if __name__ == "__main__":
         for p in processes:
             p.wait()
     except KeyboardInterrupt:
-        print("检测到中断，正在终止所有子进程...")
+        print("\033[91m检测到中断，正在终止所有子进程...\033[0m")
         for p in processes:
-            p.terminate()
-        for p in processes:
-            p.wait()
-        print("所有子进程已终止。")
+            try:
+                p.terminate()
+                # 给进程5秒时间优雅退出
+                p.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                print(f"\033[93m进程 {p.pid} 未响应，强制终止...\033[0m")
+                p.kill()
+                p.wait()
+            except Exception as e:
+                print(f"\033[93m终止进程时出错: {e}\033[0m")
+        print("\033[91m所有子进程已终止。\033[0m")

@@ -17,15 +17,25 @@ class HtmlView(BaseModel):
     danmu_text: str
 
 def call_openai_api(messages):
-    client = OpenAI()
-    completion = client.beta.chat.completions.parse(
-        model="gpt-4o-mini",
-        messages=messages,
-        response_format=HtmlView,
-        max_tokens=10000,
-    )
-    response = completion.choices[0].message.parsed
-    return response
+    client = OpenAI(timeout=30.0)  # 设置30秒超时
+    try:
+        completion = client.beta.chat.completions.parse(
+            model="gpt-4o-mini",
+            messages=messages,
+            response_format=HtmlView,
+            max_tokens=10000,
+        )
+        response = completion.choices[0].message.parsed
+        return response
+    except Exception as e:
+        print(f"OpenAI API调用失败: {e}")
+        # 返回默认响应
+        return HtmlView(
+            height=400,
+            width=600,
+            html="<div style='padding: 16px; background-color: white; border-radius: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); color: #007aff;'><h2 style='font-size: 20px; font-weight: bold; margin-bottom: 8px;'>系统提示</h2><p style='margin-bottom: 16px;'>网络连接超时，请稍后重试。</p></div>",
+            danmu_text="网络连接超时"
+        )
 
 def reset_status():
     data = {
@@ -171,10 +181,10 @@ def periodic_ai_task():
             traceback.print_exc()
         brain_loop = int(os.environ.get("BRAIN_LOOP", 0))
         if brain_loop == 1:
+            time.sleep(AI_TIME_INTERVAL)
             continue
         else:
             break
-        time.sleep(AI_TIME_INTERVAL)
 
 if __name__ == "__main__":
     periodic_ai_task()

@@ -15,12 +15,19 @@ def transcribe_audio(filename):
         }
         data = {'model': MODEL}
         headers = {"Authorization": f"Bearer {TOKEN}"}
-        resp = requests.post(SILICONFLOW_URL, files=files, data=data, headers=headers)
         try:
-            text = resp.json().get('text', '')
-        except Exception:
-            text = resp.text
-        return text
+            resp = requests.post(SILICONFLOW_URL, files=files, data=data, headers=headers, timeout=30)
+            try:
+                text = resp.json().get('text', '')
+            except Exception:
+                text = resp.text
+            return text
+        except requests.exceptions.Timeout:
+            print(f"转写超时: {filename}")
+            return ""
+        except requests.exceptions.RequestException as e:
+            print(f"转写请求失败: {filename}, {e}")
+            return ""
 
 def poll_and_transcribe_audio_dir(poll_interval=2):
     processed_files = set()
@@ -54,4 +61,9 @@ def poll_and_transcribe_audio_dir(poll_interval=2):
         time.sleep(poll_interval)
 
 if __name__ == "__main__":
-    poll_and_transcribe_audio_dir()
+    try:
+        poll_and_transcribe_audio_dir()
+    except KeyboardInterrupt:
+        print("转写进程被中断")
+    except Exception as e:
+        print(f"转写进程出错: {e}")
