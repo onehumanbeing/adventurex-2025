@@ -99,19 +99,22 @@ def reset_status():
         "html": """
     <style>
       /* ================= 1. 全局 ================= */ 
+      * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
-        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
-          sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
       }
       body {
         height: 100vh;
+        width: 100vw;
         display: flex;
         align-items: center;
         justify-content: center;
         background: #0e0e14;
         overflow: hidden;
+        margin: 0;
+        padding: 0;
       }
 
       /* ================= 2. low-poly 背景 ================= */
@@ -137,7 +140,8 @@ def reset_status():
         padding: 4px;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
+        justify-content: center;
+        align-items: center;
         border: 1px solid #fff4;
         box-shadow: 0 4px 24px 0 #b96af366;
         animation: cardFadeIn 0.8s cubic-bezier(0.4, 2, 0.6, 1) 1,
@@ -148,8 +152,9 @@ def reset_status():
       .card-inner {
         background: rgba(255, 255, 255, 0.95);
         border-radius: 14px;
-        padding: 6px;
-        flex: 1;
+        padding: 20px;
+        width: 100%;
+        height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -163,7 +168,7 @@ def reset_status():
         font-size: 32px;
         font-weight: 800;
         color: #333;
-        margin-bottom: 12px;
+        margin-bottom: 16px;
         position: relative;
         overflow: hidden;
         height: 40px;
@@ -187,6 +192,7 @@ def reset_status():
         opacity: 0;
         transform: translateX(-30px);
         animation: descSlideIn 1s ease-out 1s forwards;
+        margin-bottom: 12px;
       }
       .sub-desc {
         font-size: 16px;
@@ -200,7 +206,7 @@ def reset_status():
         opacity: 0;
         transform: translateX(30px);
         animation: descSlideIn 1s ease-out 1.5s forwards;
-        margin-top: 8px;
+        margin-bottom: 20px;
       }
       /* 爆炸粒子 */
       #explode {
