@@ -14,4 +14,6 @@ struct StatusData: Codable, Equatable {
     let danmu_text: String
     let height: Int
     let width: Int
+    let action: String?
+    let value: String?
 } 

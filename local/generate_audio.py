@@ -60,8 +60,8 @@ def t2a_minimax(
 
 if __name__ == "__main__":
     import sys
-    text = sys.argv[1] if len(sys.argv) > 1 else "Henry你好，诺诺米为您服务"
+    text = sys.argv[1] if len(sys.argv) > 1 else "诺诺米检测到二维码，为您自动检测"
     audio = t2a_minimax(text)
-    with open("hello.mp3", "wb") as f:
+    with open("cache/voice/qr.mp3", "wb") as f:
         f.write(audio)
-    print("音频已保存为 hello.mp3")
+    print("音频已保存为 qr.mp3")

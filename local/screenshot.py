@@ -30,10 +30,10 @@ def continuous_screenshot(duration_sec=10, interval_sec=1):
             filepath = os.path.join(output_dir, filename)
             screenshot_display(display_index, filepath)
 
-            # 缩小图片尺寸为原来的1/3
+            # 缩小图片尺寸为原来的1/4
             try:
                 with Image.open(filepath) as img:
-                    new_size = (img.width // 3, img.height // 3)
+                    new_size = (img.width // 4, img.height // 4)
                     img_resized = img.resize(new_size, Image.LANCZOS)
                     img_resized.save(filepath, optimize=True)
                     print(f"已缩放并保存: {filepath} ({new_size[0]}x{new_size[1]})")

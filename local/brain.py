@@ -39,6 +39,8 @@ def call_openai_api(messages):
 
 def reset_status():
     data = {
+        "action": "nonomi",
+        "value": "",
         "voice": "https://helped-monthly-alpaca.ngrok-free.app/voice/hello.mp3",
         "timestamp": int(time.time()),
         "html": "<div style='height: 100%; width: 100%; padding: 16px; background-color: white; border-radius: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); color: #007aff;'><h2 style='font-size: 20px; font-weight: bold; margin-bottom: 8px;'>时尚提示</h2><p style='margin-bottom: 16px;'>您对这件衣服感兴趣，请确认价格以便购买！</p><div style='margin-top: 16px;'><button style='background-color: #007aff; color: white; padding: 10px 20px; border-radius: 12px; border: none; cursor: pointer;'>查询价格</button></div></div>",

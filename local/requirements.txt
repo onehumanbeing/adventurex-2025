@@ -1,3 +1,7 @@
 sounddevice
 numpy
 requests
+opencv-python
+pyzbar
+watchdog
+Pillow

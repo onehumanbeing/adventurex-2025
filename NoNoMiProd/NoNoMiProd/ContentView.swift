@@ -12,6 +12,8 @@ import RealityKitContent
 struct ContentView: View {
     @StateObject private var apiService = APIService()
     @StateObject private var audioPlayer = AudioPlayer()
+    @State private var showQRWebView = false
+    @State private var qrURL = ""
     
     var body: some View {
         ZStack {
@@ -77,6 +79,22 @@ struct ContentView: View {
             .padding(.leading, 20)
             .padding(.trailing, 20)
             
+            // 二维码WebView - 显示在右侧
+            if showQRWebView && !qrURL.isEmpty {
+                VStack {
+                    Spacer()
+                    
+                    HStack {
+                        Spacer()
+                        
+                        QRWebView(url: qrURL, isVisible: $showQRWebView)
+                            .padding(.trailing, 20)
+                    }
+                    
+                    Spacer()
+                }
+            }
+            
             // 错误信息显示
             if let error = apiService.error {
                 VStack {
@@ -123,6 +141,22 @@ struct ContentView: View {
             if let status = newStatus {
                 print("检测到新数据，自动播放音频...")
                 audioPlayer.autoPlayAudio(from: status.voice)
+                
+                // 检查是否为二维码action
+                if status.action == "qr", let qrValue = status.value {
+                    print("检测到二维码action，显示WebView...")
+                    qrURL = qrValue
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        showQRWebView = true
+                    }
+                } else {
+                    // 如果不是二维码action，隐藏WebView
+                    if showQRWebView {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            showQRWebView = false
+                        }
+                    }
+                }
             }
         }
         .onDisappear {
@@ -132,6 +166,7 @@ struct ContentView: View {
         }
         .animation(.easeInOut(duration: 0.3), value: apiService.currentStatus)
         .animation(.easeInOut(duration: 0.3), value: apiService.error)
+        .animation(.easeInOut(duration: 0.3), value: showQRWebView)
     }
 }
 
