@@ -93,24 +93,20 @@ struct ContentView: View {
                 }
                 
                 // 二维码WebView - 显示在Danmu text下面
-                if showQRWebView {
-                    QRWebView(url: qrURL.isEmpty ? "https://www.google.com" : qrURL, isVisible: $showQRWebView)
+                if showQRWebView && !qrURL.isEmpty {
+                    QRWebView(url: qrURL, isVisible: $showQRWebView)
                         .zIndex(10) // 提高z-index确保在最上层
                         .transition(.scale.combined(with: .opacity))
                 }
                 
-                // 调试信息显示
-                #if DEBUG
-                Text("DEBUG: showQRWebView=\(showQRWebView), qrURL=\(qrURL)")
-                    .font(.caption)
-                    .foregroundColor(.red)
-                    .padding(4)
-                    .background(Color.black.opacity(0.7))
-                #endif
+
                 
-                // 钱包组件 - 在danmu下面
-                WalletView(walletService: walletService)
-                    .padding(.top, 20)
+                // 钱包组件 - 只在action=inj时显示
+                if let status = apiService.currentStatus, status.action == "inj" {
+                    WalletView(walletService: walletService)
+                        .padding(.top, 20)
+                        .transition(.scale.combined(with: .opacity))
+                }
                 
                 Spacer()
             }
@@ -206,28 +202,14 @@ struct ContentView: View {
                 }
                 // 检查是否为加密货币转账action
                 else if status.action == "inj" {
-                    print("检测到Injective转账action，播放voice并显示QRCode...")
-                    print("🔍 DEBUG - status.value: \(status.value ?? "nil")")
-                    
                     // 播放语音
                     if !(status.voice ?? "").isEmpty {
-                        print("播放inj音频: \(status.voice ?? "")")
                         audioPlayer.autoPlayAudio(from: status.voice ?? "")
-                    } else {
-                        print("警告: inj action的voice URL为空")
                     }
                     
                     // 如果有value，显示QRCode WebView
                     if let qrValue = status.value, !qrValue.isEmpty {
-                        print("✅ 显示inj的QRCode: \(qrValue)")
                         qrURL = qrValue
-                        showQRWebView = true  // 移除动画，直接设置
-                        print("🔍 DEBUG - showQRWebView设置为: \(showQRWebView), qrURL设置为: \(qrURL)")
-                    } else {
-                        print("⚠️ status.value为空或nil，无法显示QRCode")
-                        // 临时：即使value为空，也显示一个测试URL来验证QRWebView是否工作
-                        print("🧪 TEMP DEBUG - 强制显示测试QRCode")
-                        qrURL = "https://www.google.com"
                         showQRWebView = true
                     }
                     
@@ -240,38 +222,26 @@ struct ContentView: View {
 
                 // 其他action或无action时，也播放语音（兼容性处理）
                 else {
-                    print("检测到其他action或无action，播放音频...")
-                    print("🔍 DEBUG - 当前action: \(status.action ?? "nil")，不应隐藏inj相关UI")
-                    
                     if !(status.voice ?? "").isEmpty {
-                        print("开始播放音频: \(status.voice ?? "")")
                         audioPlayer.autoPlayAudio(from: status.voice ?? "")
-                    } else {
-                        print("警告: voice URL为空，跳过音频播放")
                     }
                     
                     // 只有在非inj和非qr action时才隐藏WebView
                     if status.action != "inj" && status.action != "qr" {
-                        print("🔍 DEBUG - 隐藏QRWebView，因为action不是inj或qr")
                         if showQRWebView {
                             withAnimation(.easeInOut(duration: 0.3)) {
                                 showQRWebView = false
                             }
                         }
-                    } else {
-                        print("🔍 DEBUG - 保持QRWebView显示，因为action是\(status.action ?? "nil")")
                     }
                     
                     // 只有在非inj action时才隐藏转账视图
                     if status.action != "inj" {
-                        print("🔍 DEBUG - 隐藏TransferView，因为action不是inj")
                         if showTransferView {
                             withAnimation(.easeInOut(duration: 0.3)) {
                                 showTransferView = false
                             }
                         }
-                    } else {
-                        print("🔍 DEBUG - 保持TransferView显示，因为action是inj")
                     }
                 }
             } else {
