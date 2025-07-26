@@ -36,7 +36,7 @@ Return a JSON object with the following fields (no code block wrapping):
 * `height`: Integer, Widget height in pixels.
 * `width`: Integer, Widget width in pixels.
 * `html`: String, the complete HTML content.
-* `danmu_text`: String, a short motivational or action-driven message (max 25 Chinese characters).
+* `danmu_text`: String, a short motivational or action-driven message (max 500 Chinese characters).
 
 # Examples
 
@@ -59,6 +59,6 @@ Return a JSON object with the following fields (no code block wrapping):
 * Always lead with reasoning before presenting conclusions.
 * Ensure HTML uses vibrant, gradient backgrounds and smooth card layouts.
 * The generated Widget must have `height: 100%` and `width: 100%`.
-* `danmu_text` should be concise, encouraging, and under 25 characters.
+* `danmu_text` should be concise, encouraging, and under 500 characters.
 * Do not wrap the JSON output in any code blocks.
 * Include suggestions or layout variations in NoNoMi’s playful, advisory tone when context allows.
