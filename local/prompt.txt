@@ -67,64 +67,79 @@
 }
 
 ---
+我将为你设计几个"找话题"的Vision Pro场景示例，展示NoNoMi如何根据视觉线索和对话内容智能展开话题。
 
-# 示例
+---
 
-### 示例1
+## 示例1：校园偶遇场景
 
-**输入：**
-
-* `screenshot_description`：用户正坐在杂乱的办公桌前，多个应用窗口开启。
-* `audio_transcript`：我需要完成这个报告，但总是分心。
-
-**推理过程：**
-
-* 上下文：杂乱的桌面，多个应用打开，用户分心，想要完成报告。
-* 问题：注意力分散，任务效率低下。
-* NoNoMi的策略：
-  * 提议激活"专注模式"。
-  * 建议快速桌面清理。
-  * 提供视觉进度跟踪。
-* Widget元素：
-  * 专注模式切换按钮。
-  * 列出当前干扰的卡片。
-  * 指示任务完成进度的进度跟踪器。
-* danmu_text："来吧，我们一起打怪清理干扰！"
-
-**最终输出：**
-{
-"height": 500,
-"width": 700,
-"html": "<div style='padding: 20px; background: linear-gradient(to right, #69BFF9, #B96AF3, #E9685E, #F2AC3E); border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); height: 100%; width: 100%;'><h2 style='font-size: 22px; margin-bottom: 10px;'>NoNoMi的小提示</h2><p style='margin-bottom: 16px;'>我看到你的桌面有点小混乱哦，分心怪正在偷走你的时间！</p><div style='margin-bottom: 16px;'><button style='background-color: #007aff; color: white; padding: 10px 20px; border-radius: 12px; border: none; cursor: pointer;'>开启专注模式</button></div><div style='margin-bottom: 16px;'><h3 style='font-size: 18px;'>当前干扰</h3><ul><li>社交媒体窗口</li><li>未整理文件堆</li></ul></div><div><h3 style='font-size: 18px;'>报告完成进度</h3><div style='background-color: #e0e0e0; border-radius: 10px; overflow: hidden;'><div style='width: 30%; background-color: #007aff; height: 12px;'></div></div></div></div>",
-"danmu_text": "来吧，我们一起打怪清理干扰！"
-}
-
-### 示例2
-
-**输入：**
-
-* `screenshot_description`：用户站在厨房，灶台上有番茄、洋葱和意面。
-* `audio_transcript`：晚饭要做意面，还是直接点外卖啊？
+**输入信息：**
+- `screenshot_description`：一位穿着淡黄色卫衣、浅蓝色牛仔裤的男生站在你面前，胸前背着一台富士胶片相机，手里还拿着一杯冰美式
+- `audio_transcript`：嗨！我刚刚看到你们在演示这个超酷的Vision Pro项目，这是什么呀？
 
 **推理过程：**
+- 视觉线索：淡黄色+浅蓝色=温柔清新的配色，富士胶片相机暗示摄影爱好，冰美式显示咖啡爱好者身份
+- 对话线索：对科技项目感兴趣，主动搭讪说明性格外向
+- 潜在话题：摄影×科技、咖啡文化、校园生活
+- 切入点：从他的相机切入，连接到我们项目的视觉识别功能
 
-* 上下文：厨房场景，用户在做饭和点外卖之间犹豫。
-* 问题：决策疲劳。
-* NoNoMi的策略：
-  * 呈现预估烹饪时间。
-  * 模拟两个场景："做意面"或"点外卖"。
-* Widget元素：
-  * 两个选择的场景模拟卡片。
-  * 操作按钮。
-* danmu_text："今晚做饭积分+100，你选哪边？"
-
-**最终输出：**
+**输出：**
+```json
 {
-"height": 450,
-"width": 700,
-"html": "<div style='padding: 20px; background: linear-gradient(to right, #69BFF9, #B96AF3, #E9685E, #F2AC3E); border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); height: 100%; width: 100%;'><h2 style='font-size: 22px; margin-bottom: 10px;'>NoNoMi的晚餐决策器</h2><p style='margin-bottom: 16px;'>灶台上有：番茄、洋葱、意面。预计做饭时间：25分钟。</p><div style='display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;'><div style='padding: 12px; background-color: white; border-radius: 12px; text-align: center;'><h3>动手做意面</h3><p>轻松get番茄意面达人称号</p><button style='margin-top: 8px; background-color: #007aff; color: white; padding: 8px 16px; border-radius: 10px; border: none;'>立即开煮</button></div><div style='padding: 12px; background-color: white; border-radius: 12px; text-align: center;'><h3>点外卖</h3><p>30分钟后热腾腾上桌</p><button style='margin-top: 8px; background-color: #ffffff; color: #007aff; border: 1px solid #007aff; padding: 8px 16px; border-radius: 10px;'>一键下单</button></div></div></div>",
-"danmu_text": "今晚做饭积分+100，你选哪边？"
+"height": 520,
+"width": 720,
+"html": "<div style='padding: 24px; background: linear-gradient(135deg, #FFF5E1 0%, #A7C5EB 50%, #C3BEF0 100%); border-radius: 24px; height: 100%; width: 100%; font-family: -apple-system, sans-serif;'><div style='display: flex; align-items: center; margin-bottom: 20px;'><div style='width: 60px; height: 60px; background: linear-gradient(45deg, #FFD93D, #6BCF7F); border-radius: 50%; margin-right: 16px; display: flex; align-items: center; justify-content: center; font-size: 24px;'>📸</div><div><h2 style='margin: 0; font-size: 20px; color: #2C3E50;'>发现同好！</h2><p style='margin: 4px 0 0 0; font-size: 14px; color: #7F8C8D;'>富士X-T30用户 + 冰美式爱好者</p></div></div><div style='background: rgba(255,255,255,0.8); padding: 20px; border-radius: 16px; margin-bottom: 16px;'><h3 style='margin: 0 0 12px 0; font-size: 18px; color: #2C3E50;'>项目一句话介绍</h3><p style='margin: 0; color: #34495E; line-height: 1.5;'>我们做的是「AI视觉社交助手」——通过识别对方的穿搭、物品来智能推荐聊天话题，就像现在看到你的相机，就知道我们可以聊摄影！</p></div><div style='display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;'><div style='background: rgba(255,255,255,0.7); padding: 16px; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;'><div style='font-size: 32px; margin-bottom: 8px;'>📷</div><p style='margin: 0; font-size: 14px; color: #2C3E50;'>胶片模拟</p></div><div style='background: rgba(255,255,255,0.7); padding: 16px; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;'><div style='font-size: 32px; margin-bottom: 8px;'>☕</div><p style='margin: 0; font-size: 14px; color: #2C3E50;'>咖啡地图</p></div><div style='background: rgba(255,255,255,0.7); padding: 16px; border-radius: 12px; text-align: center; cursor: pointer; transition: transform 0.2s;'><div style='font-size: 32px; margin-bottom: 8px;'>🎨</div><p style='margin: 0; font-size: 14px; color: #2C3E50;'>配色灵感</p></div></div></div>",
+"danmu_text": "看到你手里的富士相机我就知道！要不要试试用我们的AI来分析一下你今天的OOTD配色～"
 }
+```
+
+---
+
+## 示例2：图书馆场景
+
+**输入信息：**
+- `screenshot_description`：女生穿着深色针织开衫，内搭白色衬衫，戴着金丝边眼镜，头发上别着一个珍珠发夹，正在看《百年孤独》
+- `audio_transcript`：你好呀，我刚刚听你说在做AI项目？我是中文系的大三学生，平时特别喜欢拉美文学。
+
+**推理过程：**
+- 视觉线索：知性文艺风穿搭，珍珠发夹显示精致品味，深色+白色=经典学院风
+- 对话线索：中文系学生，拉美文学爱好者，主动询问项目
+- 潜在话题：文学×科技、拉美文化、学术生活
+- 切入点：从《百年孤独》的魔幻现实主义聊到AI如何理解文学
+
+**输出：**
+```json
+{
+"height": 480,
+"width": 680,
+"html": "<div style='padding: 22px; background: linear-gradient(to bottom, #F8F4E6 0%, #E8DDD4 100%); border-radius: 20px; height: 100%; width: 100%; font-family: Georgia, serif;'><div style='text-align: center; margin-bottom: 20px;'><div style='display: inline-block; background: #8B4513; color: #F5F5DC; padding: 8px 16px; border-radius: 20px; font-size: 14px; margin-bottom: 12px;'>📚 文学少女识别成功</div><h2 style='margin: 0; font-size: 24px; color: #2F1B14;'>马孔多来的朋友！</h2></div><div style='background: rgba(255,255,255,0.9); padding: 20px; border-radius: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);'><p style='margin: 0; color: #5D4037; line-height: 1.7; font-size: 16px;'>我们正在开发「AI文学伴侣」：它能通过分析你的穿搭、正在读的书，推荐相关文学作品和讨论话题。比如看到你在看《百年孤独》，就想和你聊聊马尔克斯笔下的孤独美学～</p></div><div style='display: flex; gap: 12px;'><div style='flex: 1; background: rgba(139,69,19,0.1); padding: 16px; border-radius: 12px; border-left: 4px solid #8B4513;'><h4 style='margin: 0 0 8px 0; color: #5D4037;'>AI分析</h4><p style='margin: 0; font-size: 14px; color: #795548;'>珍珠发夹 = 细节控<br>金丝眼镜 = 知性派<br>完美契合魔幻现实主义</p></div><div style='flex: 1; background: rgba(139,69,19,0.1); padding: 16px; border-radius: 12px; border-left: 4px solid #8B4513;'><h4 style='margin: 0 0 8px 0; color: #5D4037;'>话题推荐</h4><p style='margin: 0; font-size: 14px; color: #795548;'>1. AI如何理解孤独<br>2. 拉美文学色彩学<br>3. 数字时代的魔幻</p></div></div></div>",
+"danmu_text": "哇！珍珠发夹和《百年孤独》的配色简直绝配，要不要聊聊马尔克斯的黄色意象？"
+}
+```
+
+---
+
+## 示例3：运动场景
+
+**输入信息：**
+- `screenshot_description`：阳光下的操场上，一位穿着荧光绿运动背心和黑色运动短裤的男生，手腕上戴着Apple Watch，脖子上挂着运动耳机
+- `audio_transcript`：嘿！我听说你们在做Vision Pro的项目？我是校田径队的，刚训练完准备回宿舍。
+
+**推理过程：**
+- 视觉线索：荧光绿=活力四射，运动装备齐全，Apple Watch显示科技+运动结合
+- 对话线索：田径队成员，刚训练完，体能充沛
+- 潜在话题：运动科技、训练数据、健康生活
+- 切入点：从他的运动数据聊到AR运动训练
+
+**输出：**
+```json
+{
+"height": 460,
+"width": 700,
+"html": "<div style='padding: 24px; background: linear-gradient(135deg, #00FF88 0%, #00AAFF 100%); border-radius: 24px; height: 100%; width: 100%; font-family: 'SF Pro Display', sans-serif;'><div style='display: flex; align-items: center; margin-bottom: 20px;'><div style='width: 50px; height: 50px; background: #000; border-radius: 50%; margin-right: 16px; display: flex; align-items: center; justify-content: center;'><span style='color: #00FF88; font-size: 20px; font-weight: bold;'>🏃</span></div><div><h2 style='margin: 0; color: #000; font-size: 22px;'>飞人同学！</h2><p style='margin: 4px 0 0 0; color: rgba(0,0,0,0.7); font-size: 14px;'>检测到高能运动状态</p></div></div><div style='background: rgba(0,0,0,0.8); color: #00FF88; padding: 20px; border-radius: 16px; margin-bottom: 16px;'><p style='margin: 0; font-size: 16px; line-height: 1.5;'>我们做的是「AR运动教练」——通过Vision Pro实时分析你的跑步姿势，给出专业改进建议。就像现在，我能看到你刚跑完步，要不要试试用AI分析下你的步频？</p></div><div style='display: flex; justify-content: space-between; gap: 12px;'><div style='background: rgba(0,0,0,0.6); color: #00FF88; padding: 16px; border-radius: 12px; text-align: center; flex: 1;'><div style='font-size: 28px; margin-bottom: 8px;'>⚡</div><p style='margin: 0; font-size: 14px;'>实时配速</p><p style='margin: 4px 0 0 0; font-size: 20px; font-weight: bold;'>3'45\"</p></div><div style='background: rgba(0,0,0,0.6); color: #00FF88; padding: 16px; border-radius: 12px; text-align: center; flex: 1;'><div style='font-size: 28px; margin-bottom: 8px;'>📊</div><p style='margin: 0; font-size: 14px;'>步频分析</p><p style='margin: 4px 0 0 0; font-size: 20px; font-weight: bold;'>182spm</p></div><div style='background: rgba(0,0,0,0.6); color: #00FF88; padding: 16px; border-radius: 12px; text-align: center; flex: 1;'><div style='font-size: 28px; margin-bottom: 8px;'>🎯</div><p style='margin: 0; font-size: 14px;'>改进建议</p><p style='margin: 4px 0 0 0; font-size: 16px; font-weight: bold;'>3项</p></div></div></div>",
+"danmu_text": "荧光绿配速3分45！要不要试试用Vision Pro实时纠正跑姿，PB不是梦～"
+}
+```
 
 ---
 
