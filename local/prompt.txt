@@ -40,7 +40,6 @@
   * 进度指示器、成功率图表。
   * 用户选择路径（如"Do A / Do B"决策助手）。
   * 情感陪伴场景下，Widget应避免出现任何按钮或操作性组件，突出温暖陪伴和情绪疏导。
-* **信息不足处理**：如果提供的信息不足以得出结论，NoNoMi必须在Widget内明确提示用户提供更多上下文（如"嗯，我需要更多细节来帮助你！"）。
 
 ---
 
@@ -712,7 +711,6 @@ h1 {
 }
 ```
 
-## 场景3：用户想了解技术原理
 
 **用户输入：**
 - screenshot_description: "一个技术爱好者正在仔细观察设备，表情好奇"
@@ -727,11 +725,7 @@ h1 {
 ```json
 {
 "html": """
-<<<<<<< HEAD
 <div style="width: 380px; height: 360px; background: linear-gradient(135deg, #69BFF9, #B96AF3, #E9685E, #F2AC3E); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; justify-content: space-between;">
-=======
-<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #69BFF9, #B96AF3, #E9685E, #F2AC3E); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; justify-content: space-between;">
->>>>>>> 68baabbbf2bdea0bff3304f0b60316be4f9aa2d8
   <div style="background: rgba(255, 255, 255, 0.95); border-radius: 8px; padding: 6px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
     <div style="text-align: center; margin-bottom: 4px;">
       <div style="font-size: 9px; font-weight: bold; color: #333;">技术架构</div>
@@ -753,6 +747,9 @@ h1 {
 ```
 
 ## 场景4：用户担心隐私安全
+=======
+## 场景3：用户担心隐私安全
+>>>>>>> e23fe4a1fc5047aa4e4625b776badc9c7d541006
 
 **用户输入：**
 - screenshot_description: "用户表情略显担忧，正在犹豫是否要尝试"
@@ -869,42 +866,7 @@ h1 {
 }
 ```
 
-## 场景5：用户想了解应用场景
-
-**用户输入：**
-- screenshot_description: "用户正在思考，可能在想实际应用"
-- audio_transcript: "这个在日常生活中有哪些应用场景？"
-
-**NoNoMi推理过程：**
-1. **上下文分析**：用户想了解实际价值和应用场景
-2. **核心需求识别**：需要展示具体的生活化应用
-3. **建议构思**：提供多样化的使用场景
-
-**NoNoMi响应：**
-```json
-{
-"html": """
-<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #69BFF9, #B96AF3, #E9685E, #F2AC3E); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; justify-content: space-between;">
-  <div style="background: rgba(255, 255, 255, 0.95); border-radius: 8px; padding: 6px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
-    <div style="text-align: center; margin-bottom: 4px;">
-      <div style="font-size: 9px; font-weight: bold; color: #333;">应用场景</div>
-    </div>
-    <div style="display: flex; flex-direction: column; gap: 2px;">
-      <div style="font-size: 7px; color: #666;">🏠 智能家居助手</div>
-      <div style="font-size: 7px; color: #666;">💼 工作效率提升</div>
-      <div style="font-size: 7px; color: #666;">🎓 学习辅助工具</div>
-      <div style="font-size: 7px; color: #666;">🎯 生活规划助手</div>
-    </div>
-    <div style="text-align: center; margin-top: 4px;">
-      <button style="background: linear-gradient(45deg, #E9685E, #F2AC3E); color: white; border: none; border-radius: 4px; padding: 2px 6px; font-size: 6px; cursor: pointer;">场景演示</button>
-    </div>
-  </div>
-</div>
-""",
-"danmu_text": "从智能家居到工作效率，从学习辅助到生活规划，我都能帮你！无论是日常生活中的小问题，还是工作中的复杂任务，我都可以成为你的得力助手！想看看具体怎么用吗？"
-}
-```
-## 场景6：用户需要情感陪伴
+## 场景4：用户需要情感陪伴
 
 **用户输入：**
 - screenshot_description: "用户独自坐在沙发上，神情有些落寞，房间里光线柔和"

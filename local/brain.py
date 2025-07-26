@@ -814,8 +814,8 @@ def periodic_ai_task():
                 "timestamp": int(time.time()),
                 "html": getattr(result, "html", ""),
                 "danmu_text": getattr(result, "danmu_text", ""),
-                "height": 600 # getattr(result, "height", 400),
-                "width": 400 # getattr(result, "width", 600),
+                "height": 600, # getattr(result, "height", 400),
+                "width": 400, # getattr(result, "width", 600),
                 "action": "render",
                 "value": ""
             }
