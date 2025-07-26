@@ -711,43 +711,8 @@ h1 {
 }
 ```
 
-## 场景3：用户想了解技术原理
 
-**用户输入：**
-- screenshot_description: "一个技术爱好者正在仔细观察设备，表情好奇"
-- audio_transcript: "这个是怎么实现的？用了什么技术？"
-
-**NoNoMi推理过程：**
-1. **上下文分析**：用户有技术背景，对实现原理感兴趣
-2. **核心需求识别**：需要技术层面的解释，但要保持易懂
-3. **建议构思**：平衡技术深度和可理解性
-
-**NoNoMi响应：**
-```json
-{
-"html": """
-<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #69BFF9, #B96AF3, #E9685E, #F2AC3E); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; justify-content: space-between;">
-  <div style="background: rgba(255, 255, 255, 0.95); border-radius: 8px; padding: 6px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
-    <div style="text-align: center; margin-bottom: 4px;">
-      <div style="font-size: 9px; font-weight: bold; color: #333;">技术架构</div>
-    </div>
-    <div style="display: flex; flex-direction: column; gap: 2px;">
-      <div style="font-size: 7px; color: #666;">🔍 计算机视觉</div>
-      <div style="font-size: 7px; color: #666;">🎤 语音识别</div>
-      <div style="font-size: 7px; color: #666;">🧠 AI推理引擎</div>
-      <div style="font-size: 7px; color: #666;">📱 实时交互</div>
-    </div>
-    <div style="text-align: center; margin-top: 4px;">
-      <button style="background: linear-gradient(45deg, #B96AF3, #69BFF9); color: white; border: none; border-radius: 4px; padding: 2px 6px; font-size: 6px; cursor: pointer;">技术详情</button>
-    </div>
-  </div>
-</div>
-""",
-"danmu_text": "结合了计算机视觉、语音识别和AI推理，实时分析环境并给出智能建议！我们的技术架构确保了高效准确的响应，让每一次交互都充满惊喜！"
-}
-```
-
-## 场景4：用户担心隐私安全
+## 场景3：用户担心隐私安全
 
 **用户输入：**
 - screenshot_description: "用户表情略显担忧，正在犹豫是否要尝试"
@@ -864,42 +829,7 @@ h1 {
 }
 ```
 
-## 场景5：用户想了解应用场景
-
-**用户输入：**
-- screenshot_description: "用户正在思考，可能在想实际应用"
-- audio_transcript: "这个在日常生活中有哪些应用场景？"
-
-**NoNoMi推理过程：**
-1. **上下文分析**：用户想了解实际价值和应用场景
-2. **核心需求识别**：需要展示具体的生活化应用
-3. **建议构思**：提供多样化的使用场景
-
-**NoNoMi响应：**
-```json
-{
-"html": """
-<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #69BFF9, #B96AF3, #E9685E, #F2AC3E); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; justify-content: space-between;">
-  <div style="background: rgba(255, 255, 255, 0.95); border-radius: 8px; padding: 6px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
-    <div style="text-align: center; margin-bottom: 4px;">
-      <div style="font-size: 9px; font-weight: bold; color: #333;">应用场景</div>
-    </div>
-    <div style="display: flex; flex-direction: column; gap: 2px;">
-      <div style="font-size: 7px; color: #666;">🏠 智能家居助手</div>
-      <div style="font-size: 7px; color: #666;">💼 工作效率提升</div>
-      <div style="font-size: 7px; color: #666;">🎓 学习辅助工具</div>
-      <div style="font-size: 7px; color: #666;">🎯 生活规划助手</div>
-    </div>
-    <div style="text-align: center; margin-top: 4px;">
-      <button style="background: linear-gradient(45deg, #E9685E, #F2AC3E); color: white; border: none; border-radius: 4px; padding: 2px 6px; font-size: 6px; cursor: pointer;">场景演示</button>
-    </div>
-  </div>
-</div>
-""",
-"danmu_text": "从智能家居到工作效率，从学习辅助到生活规划，我都能帮你！无论是日常生活中的小问题，还是工作中的复杂任务，我都可以成为你的得力助手！想看看具体怎么用吗？"
-}
-```
-## 场景6：用户需要情感陪伴
+## 场景4：用户需要情感陪伴
 
 **用户输入：**
 - screenshot_description: "用户独自坐在沙发上，神情有些落寞，房间里光线柔和"
