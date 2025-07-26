@@ -43,9 +43,20 @@ struct StatusIndicatorView: View {
         .padding(.horizontal, 19) // 增加水平内边距 (16 * 1.2)
         .padding(.vertical, 12) // 增加垂直内边距 (10 * 1.2)
         .background(
-            RoundedRectangle(cornerRadius: 12) // 增加圆角
+            RoundedRectangle(cornerRadius: 16)
                 .fill(.ultraThinMaterial)
-                .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 3) // 增加阴影效果
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(
+                            LinearGradient(
+                                colors: [Color.black.opacity(0.6), Color.gray.opacity(0.3), Color.black.opacity(0.6)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
+                )
+                .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
         )
     }
 }

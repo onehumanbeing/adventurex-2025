@@ -23,16 +23,7 @@ struct DanmuView: View {
                         // 播放时：音波动画
                         HStack(spacing: 1) {
                             ForEach(0..<15) { index in
-                                RoundedRectangle(cornerRadius: 1)
-                                    .fill(Color.blue)
-                                    .frame(width: 1, height: 6)
-                                    .scaleEffect(y: 0.3 + sin(Double(index) * 0.4 + Date().timeIntervalSince1970 * 3) * 0.7)
-                                    .animation(
-                                        Animation.easeInOut(duration: 0.2)
-                                            .repeatForever()
-                                            .delay(Double(index) * 0.01),
-                                        value: audioPlayer.isPlaying
-                                    )
+                                DanmuWaveBarView(index: index, isPlaying: audioPlayer.isPlaying)
                             }
                         }
                         .frame(width: 150, height: 36)
@@ -68,11 +59,41 @@ struct DanmuView: View {
         }
         .padding(48) // 增加内边距 (40 * 1.2)
         .background(
-            RoundedRectangle(cornerRadius: 12)
+            RoundedRectangle(cornerRadius: 16)
                 .fill(.ultraThinMaterial)
-                .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .stroke(
+                            LinearGradient(
+                                colors: [Color.black.opacity(0.6), Color.gray.opacity(0.3), Color.black.opacity(0.6)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
+                )
+                .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
         )
         .frame(maxWidth: 1020) // 增加最大宽度 (850 * 1.2)
+    }
+}
+
+struct DanmuWaveBarView: View {
+    let index: Int
+    let isPlaying: Bool
+
+    var body: some View {
+        let scaleY = 0.3 + sin(Double(index) * 0.4 + Date().timeIntervalSince1970 * 3) * 0.7
+        return RoundedRectangle(cornerRadius: 1)
+            .fill(Color.blue)
+            .frame(width: 1, height: 6)
+            .scaleEffect(y: scaleY)
+            .animation(
+                Animation.easeInOut(duration: 0.2)
+                    .repeatForever()
+                    .delay(Double(index) * 0.01),
+                value: isPlaying
+            )
     }
 }
 

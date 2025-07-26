@@ -25,7 +25,7 @@ class HtmlView(BaseModel):
 class isFinished(BaseModel):
     result: bool
 
-def call_openai_api(messages, thread_id=None, response_format=HtmlView, model="gpt-4o-mini"):
+def call_openai_api(messages, thread_id=None, response_format=HtmlView, model="gpt-4o-mini", max_tokens=2000):
     """
     调用OpenAI API进行图像和语音分析
     Args:
@@ -33,18 +33,20 @@ def call_openai_api(messages, thread_id=None, response_format=HtmlView, model="g
         thread_id: 线程ID
         response_format: 返回格式
         model: 使用的模型
+        max_tokens: 最大token数，默认2000
     Returns:
         (response, err): 响应对象和错误（如有）
     """
     if thread_id is None:
         thread_id = f"local_thread_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
-    client = OpenAI(timeout=10.0)
+    
+    client = OpenAI(timeout=30.0)
     try:
         if response_format == "text":
             completion = client.chat.completions.create(
                 model=model,
                 messages=messages,
-                max_tokens=10000
+                max_tokens=max_tokens
             )
             response = completion.choices[0].message.content
         else:
@@ -52,7 +54,7 @@ def call_openai_api(messages, thread_id=None, response_format=HtmlView, model="g
                 model=model,
                 messages=messages,
                 response_format=response_format,
-                max_tokens=10000
+                max_tokens=max_tokens
             )
             response = completion.choices[0].message.parsed
         tracer.log_brain_conversation(
@@ -90,7 +92,7 @@ def update_status_json(fields: dict):
 
 def reset_status():
     data = {
-        "action": "nonomi",
+        "action": "render",
         "value": "",
         "voice": "https://helped-monthly-alpaca.ngrok-free.app/voice/hello.mp3",
         "timestamp": int(time.time()),
@@ -152,7 +154,8 @@ def periodic_ai_task():
                 finished_result, finished_err = call_openai_api(
                     finished_messages,
                     response_format=isFinished,
-                    model="gpt-4o-mini"
+                    model="gpt-4o-mini",
+                    max_tokens=50  # isFinished只需要返回布尔值，50个token足够
                 )
                 if finished_err is not None:
                     print("判断请求异常:", finished_err)
@@ -160,10 +163,10 @@ def periodic_ai_task():
                     continue
                 
                 if not finished_result.result:
-                    print("音频内容不需要触发AI回复，跳过本次处理")
+                    print("❌音频内容不需要触发AI回复，跳过本次处理")
                     time.sleep(3)
                     continue
-                print("音频内容需要触发AI回复，继续处理")
+                print("✅音频内容需要触发AI回复，继续处理")
                 # 清空音频文件
                 try:
                     with open(AUDIO_TXT_PATH, "w", encoding="utf-8") as f:
@@ -232,10 +235,11 @@ def periodic_ai_task():
             try:
                 response, err = call_openai_api(
                     image_analysis_messages,
-                    response_format="text"
+                    response_format="text",
+                    max_tokens=500  # 图片分析文本，通常500个token足够描述图片
                 )
                 t2 = time.time()
-                print("图片细节分析结果:", response)
+                print("✅ 图片细节分析结果:", response)
                 print(f"图片细节分析耗时: {t2-t1:.2f}秒")
                 if err is not None:
                     print("图片细节分析请求异常:", err)
@@ -279,20 +283,18 @@ def periodic_ai_task():
         try:
             # 生成基于当前时间的thread_id
             current_thread_id = f"local_brain_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
-            result, err = call_openai_api(messages, thread_id=current_thread_id)
+            result, err = call_openai_api(messages, thread_id=current_thread_id, max_tokens=2000)  # HtmlRender主请求，需要更多token来生成HTML和弹幕
             t4 = time.time()
-            print(f"主请求耗时: {t4-t3:.2f}秒")
-            print("AI HTML结果:", result)
+            print(f"✅ 主请求耗时: {t4-t3:.2f}秒")
+            print("✅ AI HTML结果:", result)
             print(f"Thread ID: {current_thread_id}")
-
-            tracer.log_brain_conversation(
-                thread_id=current_thread_id,
-                messages=messages,
-                result=result,
-                image_paths=latest_images,
-                audio_content=f"audio: {audio_content}" if audio_content else None
-            )
-
+            # tracer.log_brain_conversation(
+            #     thread_id=current_thread_id,
+            #     messages=messages,
+            #     result=result,
+            #     image_paths=latest_images,
+            #     audio_content=f"audio: {audio_content}" if audio_content else None
+            # )
             if hasattr(result, "danmu_text") and result.danmu_text != "":
                 audio = t2a_minimax(result.danmu_text)
                 with open(f"cache/voice/{current_timestamp}.mp3", "wb") as f:

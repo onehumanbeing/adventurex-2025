@@ -12,8 +12,8 @@ struct ImmersiveView: View {
 //            anchor.name = "Head Anchor"
             
             if let debugAttachment = attachments.entity(for: "canvas") {
-                // 调整位置，让视图更靠右，避免遮挡主视角
-                debugAttachment.position = [0.3, 0, -1.0] // 向右偏移0.3米
+                // 调整位置，让视图更靠左，避免遮挡主视角
+                debugAttachment.position = [-0.3, 0, -1.0] // 向左偏移0.3米
                 anchor.addChild(debugAttachment)
             }
             
