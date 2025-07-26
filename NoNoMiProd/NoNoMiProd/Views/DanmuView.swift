@@ -20,18 +20,19 @@ struct DanmuView: View {
                     Spacer()
                     
                     if audioPlayer.isPlaying {
-                        // 播放时：音波动画
-                        HStack(spacing: 1) {
-                            ForEach(0..<15) { index in
-                                DanmuWaveBarView(index: index, isPlaying: audioPlayer.isPlaying)
+                        // 播放时：真正的音频可视化
+                        DanmuWaveformView(isPlaying: audioPlayer.isPlaying, audioPlayer: audioPlayer)
+                            .frame(width: 150, height: 36)
+                    } else {
+                        // 静音时：静态的波形条
+                        HStack(spacing: 2) {
+                            ForEach(0..<30, id: \.self) { _ in
+                                RoundedRectangle(cornerRadius: 1)
+                                    .fill(Color.blue.opacity(0.3))
+                                    .frame(width: 3, height: 6)
                             }
                         }
                         .frame(width: 150, height: 36)
-                    } else {
-                        // 静音时：蓝色直线
-                        Rectangle()
-                            .fill(Color.blue)
-                            .frame(width: 150, height: 3)
                     }
                 }
                 
@@ -78,25 +79,32 @@ struct DanmuView: View {
     }
 }
 
-struct DanmuWaveBarView: View {
-    let index: Int
+struct DanmuWaveformView: View {
     let isPlaying: Bool
-
+    @ObservedObject var audioPlayer: AudioPlayer
+    
     var body: some View {
-        let scaleY = 0.3 + sin(Double(index) * 0.4 + Date().timeIntervalSince1970 * 3) * 0.7
-        return RoundedRectangle(cornerRadius: 1)
-            .fill(Color.blue)
-            .frame(width: 1, height: 6)
-            .scaleEffect(y: scaleY)
-            .animation(
-                Animation.easeInOut(duration: 0.2)
-                    .repeatForever()
-                    .delay(Double(index) * 0.01),
-                value: isPlaying
-            )
+        HStack(spacing: 2) {
+            ForEach(0..<min(30, audioPlayer.audioLevels.count), id: \.self) { index in
+                let level = audioPlayer.audioLevels[index]
+                let height: CGFloat = max(3, CGFloat(level) * 30) // 最小3px，最大30px
+                
+                RoundedRectangle(cornerRadius: 1)
+                    .fill(Color.blue)
+                    .frame(width: 3, height: height)
+                    .animation(.easeInOut(duration: 0.1), value: level)
+            }
+        }
+        .frame(maxHeight: 30)
     }
 }
 
+
+
 #Preview {
-    DanmuView(text: "对灰绿色裤子的赞美，探讨衣物价格与购物渠道的对话。", audioPlayer: AudioPlayer())
+    let audioPlayer = AudioPlayer()
+    return DanmuView(
+        text: "对灰绿色裤子的赞美，探讨衣物价格与购物渠道的对话。",
+        audioPlayer: audioPlayer
+    )
 } 
