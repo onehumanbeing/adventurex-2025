@@ -3,33 +3,28 @@ import Security
 
 enum CryptoChain: String, CaseIterable {
     case injective = "inj"
-    case bnb = "bnb"
     
     var name: String {
         switch self {
         case .injective: return "Injective"
-        case .bnb: return "BNB Chain"
         }
     }
     
     var logoName: String {
         switch self {
         case .injective: return "🔹"
-        case .bnb: return "🟡"
         }
     }
     
     var explorerURL: String {
         switch self {
         case .injective: return "https://testnet.explorer.injective.network"
-        case .bnb: return "https://testnet.bscscan.com"
         }
     }
     
     var rpcURL: String {
         switch self {
         case .injective: return "https://testnet.sentry.tm.injective.network:443"
-        case .bnb: return "https://data-seed-prebsc-1-s1.binance.org:8545"
         }
     }
 }
@@ -56,6 +51,7 @@ class CryptoWalletService: ObservableObject {
         for chain in CryptoChain.allCases {
             if let privateKey = keychain.get(chain.rawValue + "_private_key") {
                 let address = generateAddress(from: privateKey, chain: chain)
+                print("💰 Loaded existing \(chain.rawValue.uppercased()) wallet address: \(address)")
                 wallets[chain] = WalletInfo(address: address, privateKey: privateKey, balance: 0.0)
             } else {
                 createNewWallet(for: chain)
@@ -64,26 +60,29 @@ class CryptoWalletService: ObservableObject {
     }
     
     private func createNewWallet(for chain: CryptoChain) {
-        let privateKey = generatePrivateKey()
-        let address = generateAddress(from: privateKey, chain: chain)
+        let privateKey: String
+        let address: String
+        
+        switch chain {
+        case .injective:
+            // 使用真实的Injective testnet私钥和地址
+            privateKey = "b62500f54a1935148e905238643b4a8c98a594c85c162e0a0b326987dca9de48"
+            address = "inj1gqe596gtdeevgs8pydq7waccq94fnpd6ktvnwh"
+            print("🔥 使用真实的 INJECTIVE TESTNET 钱包地址: \(address)")
+        }
         
         keychain.set(privateKey, forKey: chain.rawValue + "_private_key")
         wallets[chain] = WalletInfo(address: address, privateKey: privateKey, balance: 0.0)
     }
     
-    private func generatePrivateKey() -> String {
-        let bytes = (0..<32).map { _ in UInt8.random(in: 0...255) }
-        return bytes.map { String(format: "%02x", $0) }.joined()
-    }
+
     
     private func generateAddress(from privateKey: String, chain: CryptoChain) -> String {
-        // 模拟地址生成（实际应用中需要使用正确的加密库）
-        let hash = privateKey.hash
+        // 使用真实的预设地址和私钥（Injective Testnet）
         switch chain {
         case .injective:
-            return "inj1" + String(format: "%x", abs(hash)).prefix(39)
-        case .bnb:
-            return "0x" + String(format: "%x", abs(hash)).prefix(40)
+            // 使用真实的Injective testnet地址
+            return "inj1gqe596gtdeevgs8pydq7waccq94fnpd6ktvnwh"
         }
     }
     

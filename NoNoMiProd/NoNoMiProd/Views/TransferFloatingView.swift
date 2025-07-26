@@ -177,12 +177,10 @@ struct TransferFloatingView: View {
     }
     
     private func setupDefaultRecipient() {
-        // 设置默认的测试收款地址
+        // 设置默认的testnet收款地址
         switch chain {
         case .injective:
-            recipientAddress = "inj1abcdefghijklmnopqrstuvwxyz123456789"
-        case .bnb:
-            recipientAddress = "0x1234567890abcdef1234567890abcdef12345678"
+            recipientAddress = "inj178e674pxwx34j8mrrhnj2cgtly8j6wwvlws0z3"
         }
     }
     

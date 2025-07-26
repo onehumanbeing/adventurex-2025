@@ -203,14 +203,7 @@ struct ContentView: View {
                         showQRWebView = false
                     }
                 }
-                else if status.action == "bnb" {
-                    print("检测到BNB转账action，显示转账界面...")
-                    transferChain = .bnb
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        showTransferView = true
-                        showQRWebView = false
-                    }
-                }
+
                 // 其他action或无action时，也播放语音（兼容性处理）
                 else {
                     print("检测到其他action或无action，播放音频...")

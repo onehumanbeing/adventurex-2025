@@ -13,45 +13,29 @@ struct WalletView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            tabSection
+            headerSection
             walletContentSection
         }
-        .frame(width: 160, height: 120)
+        .frame(width: 320, height: 240)
         .background(walletBackground)
     }
     
-    private var tabSection: some View {
-        HStack(spacing: 0) {
-            ForEach(CryptoChain.allCases, id: \.self) { chain in
-                tabButton(for: chain)
-            }
+    private var headerSection: some View {
+        HStack {
+            Text(selectedChain.logoName)
+                .font(.title2)
+            Text("INJECTIVE TESTNET")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.white)
+            Spacer()
         }
-        .padding(4)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .fill(.ultraThinMaterial)
+                .fill(.blue.gradient)
         )
-    }
-    
-    private func tabButton(for chain: CryptoChain) -> some View {
-        Button(action: {
-            withAnimation(.easeInOut(duration: 0.2)) {
-                walletService.selectedChain = chain
-            }
-        }) {
-            Text(chain.rawValue.uppercased())
-                .font(.caption)
-                .fontWeight(.medium)
-                .foregroundColor(selectedChain == chain ? .white : .gray)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
-                .background(tabButtonBackground(for: chain))
-        }
-    }
-    
-    private func tabButtonBackground(for chain: CryptoChain) -> some View {
-        RoundedRectangle(cornerRadius: 8)
-            .fill(selectedChain == chain ? Color.blue : Color.clear)
     }
     
     private var walletContentSection: some View {
