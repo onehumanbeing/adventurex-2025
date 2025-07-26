@@ -32,6 +32,24 @@ struct ContentView: View {
                         width: status.width,
                         height: status.height
                     )
+                    .frame(width: CGFloat(status.width) * 1.62, height: CGFloat(status.height) * 1.62)
+                    .clipShape(RoundedRectangle(cornerRadius: 16))
+                    .background(
+                        RoundedRectangle(cornerRadius: 20)
+                            .fill(.ultraThinMaterial)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 20)
+                                    .stroke(
+                                        LinearGradient(
+                                            colors: [Color.black.opacity(0.6), Color.gray.opacity(0.3), Color.black.opacity(0.6)],
+                                            startPoint: .topLeading,
+                                            endPoint: .bottomTrailing
+                                        ),
+                                        lineWidth: 1.5
+                                    )
+                            )
+                            .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
+                    )
                     .transition(.opacity.combined(with: .scale))
                 } else {
                     // 显示占位符

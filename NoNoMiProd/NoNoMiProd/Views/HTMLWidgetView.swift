@@ -8,75 +8,83 @@
 import SwiftUI
 import WebKit
 
-struct HTMLWidgetView: View {
+struct HTMLWidgetView: UIViewRepresentable {
     let html: String
     let width: Int
     let height: Int
     
-    // 将API返回的像素尺寸转换为SwiftUI的尺寸
-    private var widgetSize: CGSize {
-        // 调整缩放比例，让HTML Widget放大1.5倍
-        let scale: CGFloat = 1.62 // 原来1.08，现在1.5倍放大 (1.08 * 1.5)
-        return CGSize(
-            width: CGFloat(width) * scale,
-            height: CGFloat(height) * scale
-        )
-    }
-    
-    var body: some View {
-        WebView(html: html)
-            .frame(width: widgetSize.width, height: widgetSize.height)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(.ultraThinMaterial)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 20)
-                            .stroke(
-                                LinearGradient(
-                                    colors: [Color.black.opacity(0.6), Color.gray.opacity(0.3), Color.black.opacity(0.6)],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                ),
-                                lineWidth: 1.5
-                            )
-                    )
-                    .shadow(color: .black.opacity(0.3), radius: 8, x: 0, y: 4)
-            )
-    }
-}
-
-struct WebView: UIViewRepresentable {
-    let html: String
-    
     func makeUIView(context: Context) -> WKWebView {
         let webView = WKWebView()
+        webView.backgroundColor = .clear
         webView.isOpaque = false
-        webView.backgroundColor = UIColor.clear
-        webView.scrollView.backgroundColor = UIColor.clear
         webView.scrollView.isScrollEnabled = false
+        webView.scrollView.bounces = false
         
-        // 注入CSS来调整内容缩放
-        let scriptSource = """
-        var style = document.createElement('style');
-        style.innerHTML = 'body { transform-origin: top left; }'; // 调整缩放比例
-        document.head.appendChild(style);
-        """
-        let userScript = WKUserScript(source: scriptSource, injectionTime: .atDocumentEnd, forMainFrameOnly: true)
-        webView.configuration.userContentController.addUserScript(userScript)
+        // 配置 WebView
+        let configuration = WKWebViewConfiguration()
+        configuration.allowsInlineMediaPlayback = true
+        configuration.mediaTypesRequiringUserActionForPlayback = []
         
         return webView
     }
     
-    func updateUIView(_ uiView: WKWebView, context: Context) {
-        uiView.loadHTMLString(html, baseURL: nil)
+    func updateUIView(_ webView: WKWebView, context: Context) {
+        // 如果 HTML 包含 React 组件或特殊内容，直接加载
+        if html.contains("react") || html.contains("React") || html.contains("magicui") {
+            // 加载本地 React 页面
+            if let url = Bundle.main.url(forResource: "widget", withExtension: "html") {
+                webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
+            } else {
+                // 如果本地文件不存在，加载在线版本
+                if let url = URL(string: "https://yourdomain.com/widget.html") {
+                    let request = URLRequest(url: url)
+                    webView.load(request)
+                }
+            }
+        } else {
+            // 普通 HTML 内容
+            let htmlContent = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    body { 
+                        margin: 0; 
+                        padding: 0; 
+                        background: transparent; 
+                        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+                    }
+                    .container { 
+                        width: 100%; 
+                        height: 100vh; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="container">
+                    \(html)
+                </div>
+            </body>
+            </html>
+            """
+            webView.loadHTMLString(htmlContent, baseURL: nil)
+        }
     }
 }
 
-#Preview {
-    HTMLWidgetView(
-        html: "<div style='text-align:center;'><h2>关于时尚和购物的对话</h2><p>在这组对话中，体现了对衣物款式的欣赏与购买意向：</p><ul><li>对灰绿色裤子的赞美，表示出不俗的品味。</li><li>令人好奇的购物渠道，展现了对服装风格的渴望。</li><li>衣物的款式与价格也是关注的重点，典型的购物对话情境。</li></ul></div>",
-        width: 800,
-        height: 600
-    )
+// 预览
+struct HTMLWidgetView_Previews: PreviewProvider {
+    static var previews: some View {
+        HTMLWidgetView(
+            html: "<div style='background: linear-gradient(135deg, #69bff9, #b96af3, #e9685e, #f2ac3e); border-radius: 12px; padding: 20px; color: white;'>Hello World!</div>",
+            width: 300,
+            height: 200
+        )
+        .frame(width: 300, height: 200)
+        .background(Color.black)
+    }
 } 

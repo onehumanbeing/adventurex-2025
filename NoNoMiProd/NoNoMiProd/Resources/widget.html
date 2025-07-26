@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NoNomi Widget</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: transparent;
+        font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      }
+      .widget-container {
+        width: 100%;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #232323;
+      }
+      .globe {
+        animation: spin 4s linear infinite;
+      }
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .firework {
+        animation: explode 2s ease-out infinite;
+      }
+      @keyframes explode {
+        0% {
+          transform: scale(0);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 0;
+        }
+      }
+      .pulse-glow {
+        animation: pulse-glow 2s ease-in-out infinite alternate;
+      }
+      @keyframes pulse-glow {
+        from {
+          box-shadow: 0 0 20px rgba(110, 193, 228, 0.5);
+        }
+        to {
+          box-shadow: 0 0 40px rgba(162, 89, 198, 0.8);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+      // 简单的 Globe 组件模拟
+      function Globe() {
+        return (
+          <div className="relative w-32 h-32">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full globe"></div>
+            <div className="absolute inset-2 bg-blue-300 rounded-full"></div>
+            <div className="absolute inset-4 bg-blue-200 rounded-full animate-pulse"></div>
+            <div className="absolute inset-6 bg-blue-100 rounded-full"></div>
+          </div>
+        );
+      }
+
+      // 简单的 Fireworks 组件模拟
+      function Fireworks() {
+        return (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            {[...Array(15)].map((_, i) => (
+              <div
+                key={i}
+                className="absolute w-2 h-2 firework"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 3}s`,
+                  animationDuration: `${2 + Math.random() * 2}s`,
+                  background: `hsl(${Math.random() * 360}, 70%, 60%)`,
+                }}
+              />
+            ))}
+          </div>
+        );
+      }
+
+      // 主组件
+      function CuteWidget() {
+        const [isAnimating, setIsAnimating] = React.useState(true);
+        const [buttonText, setButtonText] = React.useState("了解更多");
+
+        React.useEffect(() => {
+          const timer = setInterval(() => {
+            setIsAnimating((prev) => !prev);
+          }, 3000);
+          return () => clearInterval(timer);
+        }, []);
+
+        const handleButtonClick = () => {
+          setButtonText("正在加载...");
+          setTimeout(() => {
+            setButtonText("了解更多");
+          }, 2000);
+        };
+
+        return (
+          <div className="widget-container">
+            <div className="relative bg-gradient-to-tr from-[#6ec1e4] via-[#a259c6] to-[#ff6a3d] p-2 rounded-[60px] shadow-2xl max-w-lg w-full pulse-glow">
+              <div className="relative bg-[#232323] rounded-[54px] p-8 flex flex-col items-center overflow-hidden">
+                {/* 烟花特效 */}
+                <Fireworks />
+
+                {/* 标题 */}
+                <div className="mb-4 z-20">
+                  <span className="text-5xl font-extrabold text-[#98f7b3] drop-shadow-lg">
+                    Hello!
+                  </span>
+                </div>
+
+                {/* 可爱副标题 */}
+                <div className="mb-6 z-20">
+                  <span className="text-2xl font-bold text-white drop-shadow">
+                    欢迎来到人生滤镜
+                  </span>
+                </div>
+
+                {/* 动态地球仪 */}
+                <div className="w-full flex justify-center mb-6 z-20">
+                  <Globe />
+                </div>
+
+                {/* 可爱描述 */}
+                <div className="text-center text-lg text-[#fff] z-20 mb-4">
+                  <span>
+                    给人生开挂的AI助手
+                    <br />
+                    让生活更智能有趣
+                  </span>
+                </div>
+
+                {/* 按钮 */}
+                <button
+                  className={`mt-4 px-6 py-3 rounded-full bg-gradient-to-r from-[#6ec1e4] to-[#a259c6] text-white font-bold shadow-lg transition-all duration-300 hover:shadow-xl ${
+                    isAnimating ? "scale-105" : "scale-100"
+                  }`}
+                  onClick={handleButtonClick}
+                >
+                  {buttonText}
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      }
+
+      // 渲染组件
+      ReactDOM.render(<CuteWidget />, document.getElementById("root"));
+    </script>
+  </body>
+</html>
