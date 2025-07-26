@@ -70,6 +70,7 @@
 * **宽度和高度dou*必须是百分之一百
 
 # Few-Shot 示例 - 现场互动场景
+# [重要]如果用户提问和场景类似或者一样，请直接使用场景的内容！
 
 ## 场景1：同学好奇询问项目
 
@@ -396,7 +397,7 @@ h1 {
 ```json
 {
 "html": """
-<div style="width: 160px; height: 120px; background: linear-gradient(135deg, #69BFF9, #B96AF3, #E9685E, #F2AC3E); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+<div style="width: 380px; height: 360px; background: linear-gradient(135deg, #69BFF9, #B96AF3, #E9685E, #F2AC3E); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; justify-content: space-between;">
   <div style="background: rgba(255, 255, 255, 0.95); border-radius: 8px; padding: 6px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
     <div style="text-align: center; margin-bottom: 4px;">
       <div style="font-size: 9px; font-weight: bold; color: #333;">技术架构</div>
@@ -546,7 +547,7 @@ h1 {
 ```json
 {
 "html": """
-<div style="width: 160px; height: 120px; background: linear-gradient(135deg, #69BFF9, #B96AF3, #E9685E, #F2AC3E); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+<div style="width: 480px; height: 360px; background: linear-gradient(135deg, #69BFF9, #B96AF3, #E9685E, #F2AC3E); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; justify-content: space-between;">
   <div style="background: rgba(255, 255, 255, 0.95); border-radius: 8px; padding: 6px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
     <div style="text-align: center; margin-bottom: 4px;">
       <div style="font-size: 9px; font-weight: bold; color: #333;">应用场景</div>
@@ -580,7 +581,7 @@ h1 {
 **NoNoMi响应：**
 {
   "html": """
-<div style="width: 160px; height: 120px; background: linear-gradient(135deg, #69BFF9, #B96AF3, #E9685E, #F2AC3E); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+<div style="width: 480px; height:36px; background: linear-gradient(135deg, #69BFF9, #B96AF3, #E9685E, #F2AC3E); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
   <div style="background: rgba(255, 255, 255, 0.95); border-radius: 8px; padding: 8px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
     <div style="font-size: 9px; font-weight: bold; color: #333; margin-bottom: 6px;">温暖陪伴</div>
     <div style="font-size: 7px; color: #666; line-height: 1.4;">有点小情绪没关系哦～<br/>来，跟NoNoMi一起做个深呼吸，或者听一首轻松的音乐吧！<br/>你永远不是一个人，我会一直陪着你。</div>
