@@ -97,282 +97,498 @@ def reset_status():
         "voice": "https://helped-monthly-alpaca.ngrok-free.app/voice/hello.mp3",
         "timestamp": int(time.time()),
         "html": """
-<div
-  style="
-    height: 100%;
-    width: 100%;
-    background: #232323;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  "
->
-  <div
-    style="
-      background: linear-gradient(90deg, #6ec1e4 0%, #a259c6 50%, #ff6a3d 100%);
-      border-radius: 60px;
-      padding: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 480px;
-      min-height: 480px;
-      width: 540px;
-      height: 540px;
-      max-width: 90vw;
-      max-height: 90vh;
-      box-shadow: 0 4px 32px rgba(0, 0, 0, 0.4);
-    "
-  >
-    <div
-      style="
-        background: #232323;
-        border-radius: 54px;
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Inspire · Creative · Enrich Life</title>
+    <style>
+      /* ================= 1. 全局 ================= */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+          sans-serif;
+      }
+      body {
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #0e0e14;
+        overflow: hidden;
+      }
+
+      /* ================= 2. low-poly 背景 ================= */
+      #bg-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
         width: 100%;
         height: 100%;
+        z-index: 0;
+        opacity: 0.8;
+      }
+      #bg-canvas canvas {
+        transform: scale(1.05);
+      }
+
+      /* ================= 3. 主卡片 ================= */
+      .card-ani {
+        width: 480px;
+        height: 380px;
+        background: linear-gradient(135deg, #69bff9, #b96af3, #e9685e, #f2ac3e);
+        border-radius: 18px;
+        padding: 4px;
         display: flex;
         flex-direction: column;
+        justify-content: space-between;
+        border: 1px solid #fff4;
+        box-shadow: 0 4px 24px 0 #b96af366;
+        animation: cardFadeIn 0.8s cubic-bezier(0.4, 2, 0.6, 1) 1,
+          float 4s ease-in-out infinite 0.8s;
+        position: relative;
+        z-index: 2;
+      }
+      .card-inner {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 14px;
+        padding: 6px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        animation: innerPop 0.7s cubic-bezier(0.4, 2, 0.6, 1) 1;
+      }
+
+      /* ================= 4. 文字 ================= */
+      .title {
+        font-size: 32px;
+        font-weight: 800;
+        color: #333;
+        margin-bottom: 12px;
+        position: relative;
         overflow: hidden;
-      "
-    >
-      <div style="padding: 40px 40px 0 40px">
-        <div
-          id="title"
-          style="
-            font-size: 56px;
-            font-weight: 700;
-            color: #98f7b3;
-            font-family: sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 70px;
-          "
-        ></div>
-      </div>
-      <div
-        style="
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-        "
-      >
-        <div
-          id="desc"
-          style="
-            font-size: 32px;
-            font-weight: 700;
-            color: #fff;
-            font-family: sans-serif;
-            text-shadow: 0 2px 8px #000;
-            text-align: center;
-            min-height: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-          "
-        ></div>
-        <div
-          id="sub-desc"
-          style="
-            font-size: 24px;
-            font-weight: 600;
-            color: #ccc;
-            font-family: sans-serif;
-            text-shadow: 0 2px 8px #000;
-            text-align: center;
-            min-height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 8px;
-          "
-        ></div>
-      </div>
-      <div
-        style="
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0 32px 24px 32px;
-        "
-      >
-        <div>
-          <div style="color: #aaa; font-size: 15px; margin-bottom: 8px">
-            Searched On
-          </div>
-          <div style="display: flex; gap: 10px">
-            <a
-              href="#"
-              style="
-                background: #232b3e;
-                color: #fff;
-                border-radius: 8px;
-                padding: 6px 14px;
-                display: inline-flex;
-                align-items: center;
-                font-size: 15px;
-                text-decoration: none;
-              "
-              ><span style="margin-right: 6px">🅑</span>Behance</a
-            >
-            <a
-              href="#"
-              style="
-                background: #1a2634;
-                color: #fff;
-                border-radius: 8px;
-                padding: 6px 14px;
-                display: inline-flex;
-                align-items: center;
-                font-size: 15px;
-                text-decoration: none;
-              "
-              ><span style="margin-right: 6px">in</span>Linkedin</a
-            >
-            <a
-              href="#"
-              style="
-                background: #ea4c89;
-                color: #fff;
-                border-radius: 8px;
-                padding: 6px 14px;
-                display: inline-flex;
-                align-items: center;
-                font-size: 15px;
-                text-decoration: none;
-              "
-              ><span style="margin-right: 6px">🏀</span>Dribbble</a
-            >
-            <a
-              href="#"
-              style="
-                background: #1da1f2;
-                color: #fff;
-                border-radius: 8px;
-                padding: 6px 14px;
-                display: inline-flex;
-                align-items: center;
-                font-size: 15px;
-                text-decoration: none;
-              "
-              ><span style="margin-right: 6px">🐦</span>Twitter</a
-            >
-          </div>
-        </div>
-        <div style="align-self: flex-end">
-          <div style="display: flex; flex-direction: column; align-items: center;">
-            <div style="width: 48px; height: 48px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-              <span style="font-size: 32px;">🎧</span>
-            </div>
-            <div style="color: #fff; font-size: 18px; font-weight: 700; margin-top: 4px; font-family: sans-serif;">NoNomi AI Assistant</div>
-          </div>
-        </div>
+        height: 40px;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: translateY(-20px);
+        animation: titleFlyIn 1s ease-out 0.5s forwards;
+      }
+      .desc {
+        font-size: 18px;
+        color: #555;
+        line-height: 1.6;
+        max-width: 380px;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: translateX(-30px);
+        animation: descSlideIn 1s ease-out 1s forwards;
+      }
+      .sub-desc {
+        font-size: 16px;
+        color: #777;
+        line-height: 1.4;
+        max-width: 380px;
+        min-height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: translateX(30px);
+        animation: descSlideIn 1s ease-out 1.5s forwards;
+        margin-top: 8px;
+      }
+      /* 爆炸粒子 */
+      #explode {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 3;
+      }
+      /* ================= 5. 按钮 ================= */
+      .ani-btn {
+        background-size: 400% 100%;
+        background-image: linear-gradient(
+          45deg,
+          #69bff9,
+          #b96af3,
+          #e9685e,
+          #f2ac3e,
+          #69bff9
+        );
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 28px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: transform 0.25s cubic-bezier(0.4, 2, 0.6, 1),
+          box-shadow 0.25s;
+        box-shadow: 0 2px 8px 0 #b96af377;
+        animation: rainbow 4s ease-in-out infinite;
+      }
+      .ani-btn:hover {
+        transform: scale(1.12) translateY(-3px);
+        box-shadow: 0 6px 18px 0 #b96af3aa;
+      }
+
+      /* ================= 6. 动画定义 ================= */
+      @keyframes cardFadeIn {
+        0% {
+          opacity: 0;
+          transform: scale(0.9) translateY(40px);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+      @keyframes innerPop {
+        0% {
+          opacity: 0;
+          transform: scale(0.8);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-8px);
+        }
+      }
+      @keyframes rainbow {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+
+      /* 新增文字动画 */
+      @keyframes titleFlyIn {
+        0% {
+          opacity: 0;
+          transform: translateY(-20px) scale(0.8);
+        }
+        50% {
+          opacity: 0.7;
+          transform: translateY(-5px) scale(1.1);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes descSlideIn {
+        0% {
+          opacity: 0;
+          transform: translateX(-30px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes textFadeIn {
+        0% {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes textBounce {
+        0% {
+          opacity: 0;
+          transform: scale(0.3);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.05);
+        }
+        70% {
+          transform: scale(0.9);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      @keyframes textGlow {
+        0%,
+        100% {
+          text-shadow: 0 0 5px rgba(105, 191, 249, 0.5);
+        }
+        50% {
+          text-shadow: 0 0 20px rgba(105, 191, 249, 0.8),
+            0 0 30px rgba(105, 191, 249, 0.6);
+        }
+      }
+
+      /* 打字机光标 */
+      .typing-cursor::after {
+        content: "|";
+        animation: blink 1s infinite;
+        color: #69bff9;
+        font-weight: bold;
+      }
+
+      @keyframes blink {
+        0%,
+        50% {
+          opacity: 1;
+        }
+        51%,
+        100% {
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- low-poly 背景 -->
+    <div id="bg-canvas"></div>
+
+    <!-- 主卡片 -->
+    <div class="card-ani">
+      <div class="card-inner">
+        <div class="title" id="title">NoNoMi 人生滤镜</div>
+        <div class="desc" id="desc">激发创造 • 丰富生活</div>
+        <div class="sub-desc" id="sub-desc">构建AGI森林🌳</div>
+        <a
+          href="https://www.xiaohongshu.com/user/profile/620103f00000000021029b87?xsec_token=YBwTrdN0RlEzIjqWDoW7NrR9KQeXLfFH4_64sZWEgYH1g=&xsec_source=app_share&xhsshare=CopyLink&appuid=620103f00000000021029b87&apptime=1753543002&share_id=4ed639c86e0a451dad4f0e5a53ea7688"
+          target="_blank"
+          class="ani-btn"
+          id="btn"
+          >点击Link主创</a
+        >
       </div>
     </div>
-  </div>
-</div>
 
-<div style="text-align: center; margin-top: 20px;">
-  <a href="https://www.xiaohongshu.com/user/profile/620103f00000000021029b87?xsec_token=YBwTrdN0RlEzIjqWDoW7NrR9KQeXLfFH4_64sZWEgYH1g=&xsec_source=app_share&xhsshare=CopyLink&appuid=620103f00000000021029b87&apptime=1753543002&share_id=4ed639c86e0a451dad4f0e5a53ea7688" target="_blank" style="background: linear-gradient(45deg, #69bff9, #b96af3, #e9685e, #f2ac3e); background-size: 400% 100%; color: white; border: none; border-radius: 8px; padding: 10px 28px; font-size: 16px; cursor: pointer; text-decoration: none; display: inline-block; animation: rainbow 4s ease-in-out infinite; transition: transform 0.25s cubic-bezier(0.4, 2, 0.6, 1), box-shadow 0.25s; box-shadow: 0 2px 8px 0 #b96af377;">Link主创</a>
-</div>
-      </div>
-    </div>
-  </div>
-</div>
+    <!-- 爆炸粒子层 -->
+    <canvas id="explode"></canvas>
 
-<script>
-// 流式文字更新函数
-function updateText(elementId, newText, animationType = 'fadeIn') {
-  const element = document.getElementById(elementId);
-  if (element) {
-    // 移除之前的动画类
-    element.classList.remove('typing-cursor', 'text-glow', 'text-bounce');
-    
-    // 根据动画类型应用不同的效果
-    switch(animationType) {
-      case 'typewriter':
-        typewriterEffect(element, newText);
-        break;
-      case 'bounce':
-        bounceEffect(element, newText);
-        break;
-      case 'glow':
-        glowEffect(element, newText);
-        break;
-      case 'fadeIn':
-      default:
-        fadeInEffect(element, newText);
-        break;
-    }
-  }
-}
+    <!-- ================= 脚本 ================= -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js  "></script>
+    <script>
+      /* ---------- 1. low-poly 背景 ---------- */
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        innerWidth / innerHeight,
+        0.1,
+        1000
+      );
+      camera.position.z = 50;
 
-// 打字机效果
-function typewriterEffect(element, text) {
-  element.textContent = '';
-  element.classList.add('typing-cursor');
-  let index = 0;
-  
-  function type() {
-    if (index < text.length) {
-      element.textContent += text.charAt(index);
-      index++;
-      setTimeout(type, 100);
-    } else {
-      element.classList.remove('typing-cursor');
-    }
-  }
-  type();
-}
+      const renderer = new THREE.WebGLRenderer({
+        canvas: document.createElement("canvas"),
+        alpha: true,
+      });
+      renderer.setSize(innerWidth, innerHeight);
+      document.getElementById("bg-canvas").appendChild(renderer.domElement);
 
-// 弹跳效果
-function bounceEffect(element, text) {
-  element.style.animation = 'none';
-  element.offsetHeight; // 触发重排
-  element.innerHTML = text;
-  element.style.animation = 'textBounce 0.8s ease-out';
-}
+      /* 随机颜色函数 */
+      const randomColor = () =>
+        new THREE.Color(Math.random(), Math.random(), Math.random());
 
-// 发光效果
-function glowEffect(element, text) {
-  element.innerHTML = text;
-  element.classList.add('text-glow');
-  setTimeout(() => {
-    element.classList.remove('text-glow');
-  }, 2000);
-}
+      /* 创建 low-poly 网格 */
+      function createMesh() {
+        const geo = new THREE.IcosahedronGeometry(26, 1);
+        const mat = new THREE.MeshBasicMaterial({
+          color: randomColor(),
+          wireframe: true,
+          transparent: true,
+          opacity: 0.25,
+        });
+        const mesh = new THREE.Mesh(geo, mat);
+        scene.add(mesh);
+        return mesh;
+      }
+      const mesh1 = createMesh();
+      const mesh2 = createMesh();
+      mesh2.rotation.set(
+        Math.random() * Math.PI,
+        Math.random() * Math.PI,
+        Math.random() * Math.PI
+      );
 
-// 淡入效果
-function fadeInEffect(element, text) {
-  element.style.animation = 'none';
-  element.offsetHeight; // 触发重排
-  element.innerHTML = text;
-  element.style.animation = 'textFadeIn 0.6s ease-out';
-}
+      /* 动画循环 */
+      function animate() {
+        requestAnimationFrame(animate);
+        mesh1.rotation.x += 0.0012;
+        mesh1.rotation.y += 0.0015;
+        mesh2.rotation.x -= 0.0013;
+        mesh2.rotation.y -= 0.0017;
+        renderer.render(scene, camera);
+      }
+      animate();
 
-// 初始化文字
-updateText('title', 'Hello!', 'bounce');
-updateText('desc', '正在为您分析当前场景信息', 'fadeIn');
-updateText('sub-desc', '构建AGI森林🌳', 'fadeIn');
+      /* ---------- 2. 流式文字更新 ---------- */
+      function updateText(elementId, newText, animationType = "fadeIn") {
+        const element = document.getElementById(elementId);
+        if (element) {
+          // 移除之前的动画类
+          element.classList.remove("typing-cursor", "text-glow", "text-bounce");
 
-// 模拟流式更新 - 使用不同动画效果
-setTimeout(() => {
-  updateText('desc', '创造力是智慧在玩耍', 'typewriter');
-}, 3000);
+          // 根据动画类型应用不同的效果
+          switch (animationType) {
+            case "typewriter":
+              typewriterEffect(element, newText);
+              break;
+            case "bounce":
+              bounceEffect(element, newText);
+              break;
+            case "glow":
+              glowEffect(element, newText);
+              break;
+            case "fadeIn":
+            default:
+              fadeInEffect(element, newText);
+              break;
+          }
+        }
+      }
 
-setTimeout(() => {
-  updateText('desc', '生活不是寻找自己，而是创造自己', 'bounce');
-}, 8000);
+      // 打字机效果
+      function typewriterEffect(element, text) {
+        element.textContent = "";
+        element.classList.add("typing-cursor");
+        let index = 0;
 
-setTimeout(() => {
-  updateText('title', 'NoNomi', 'glow');
-  updateText('desc', '激发创造 • 丰富生活', 'fadeIn');
-  updateText('sub-desc', '构建AGI森林🌳', 'fadeIn');
-}, 12000);
-</script>
+        function type() {
+          if (index < text.length) {
+            element.textContent += text.charAt(index);
+            index++;
+            setTimeout(type, 100);
+          } else {
+            element.classList.remove("typing-cursor");
+          }
+        }
+        type();
+      }
+
+      // 弹跳效果
+      function bounceEffect(element, text) {
+        element.style.animation = "none";
+        element.offsetHeight; // 触发重排
+        element.innerHTML = text;
+        element.style.animation = "textBounce 0.8s ease-out";
+      }
+
+      // 发光效果
+      function glowEffect(element, text) {
+        element.innerHTML = text;
+        element.classList.add("text-glow");
+        setTimeout(() => {
+          element.classList.remove("text-glow");
+        }, 2000);
+      }
+
+      // 淡入效果
+      function fadeInEffect(element, text) {
+        element.style.animation = "none";
+        element.offsetHeight; // 触发重排
+        element.innerHTML = text;
+        element.style.animation = "textFadeIn 0.6s ease-out";
+      }
+
+      // 只保留title的动画效果
+      setTimeout(() => {
+        updateText("title", "NoNoMi", "glow");
+      }, 12000);
+
+      /* ---------- 3. 按钮点击粒子爆炸 ---------- */
+      const explode = document.getElementById("explode");
+      const ctx = explode.getContext("2d");
+      explode.width = innerWidth;
+      explode.height = innerHeight;
+
+      let particles = [];
+      class Particle {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+          this.vx = (Math.random() - 0.5) * 8;
+          this.vy = (Math.random() - 0.5) * 8;
+          this.life = 60;
+          this.color = `hsl(${Math.random() * 360},100%,70%)`;
+        }
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.life--;
+        }
+        draw() {
+          ctx.globalAlpha = this.life / 60;
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      document.getElementById("btn").addEventListener("click", (e) => {
+        const rect = e.target.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        for (let i = 0; i < 60; i++) particles.push(new Particle(x, y));
+
+        // 点击按钮时只触发粒子效果，文字保持不变
+      });
+
+      function renderExplode() {
+        ctx.clearRect(0, 0, innerWidth, innerHeight);
+        particles.forEach((p, i) => {
+          p.update();
+          p.draw();
+          if (p.life <= 0) particles.splice(i, 1);
+        });
+        requestAnimationFrame(renderExplode);
+      }
+      renderExplode();
+
+      /* ---------- 4. 窗口自适应 ---------- */
+      addEventListener("resize", () => {
+        camera.aspect = innerWidth / innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(innerWidth, innerHeight);
+        explode.width = innerWidth;
+        explode.height = innerHeight;
+      });
+    </script>
+  </body>
+</html>
 """,
         "danmu_text": "QAQ",
         "height": 400,
