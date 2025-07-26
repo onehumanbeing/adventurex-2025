@@ -1,10 +1,3 @@
-//
-//  WidgetRenderView.swift
-//  NoNoMi
-//
-//  Created by AI Assistant on 24/7/2025.
-//
-
 import SwiftUI
 import WebKit
 

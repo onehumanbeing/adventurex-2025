@@ -1,0 +1,117 @@
+<div class="card-ani">
+  <div class="card-inner">
+    <div class="title" id="title"></div>
+    <div class="desc">给人生开挂的 AI 助手<br/>让生活更智能有趣</div>
+    <button class="ani-btn">了解更多</button>
+  </div>
+</div>
+
+<style>
+.card-ani{
+  width:450px;
+  height:360px;
+  background:linear-gradient(135deg,#69bff9,#b96af3,#e9685e,#f2ac3e);
+  border-radius:12px;
+  padding:4px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  border:1px solid #fff3;
+  box-shadow:0 2px 12px 0 #b96af355;
+  animation:cardFadeIn .8s cubic-bezier(.4,2,.6,1) 1,
+            float   3s ease-in-out infinite .8s;
+}
+.card-inner{
+  background:rgba(255,255,255,.95);
+  border-radius:8px;
+  padding:6px;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  text-align:center;
+  animation:innerPop .7s cubic-bezier(.4,2,.6,1) 1;
+}
+.title{
+  font-size:28px;          /* 明显放大 */
+  font-weight:bold;
+  color:#333;
+  margin-bottom:10px;
+  position:relative;
+  overflow:hidden;
+  height:34px;             /* 保证垂直不抖动 */
+  white-space:nowrap;      /* 打字机需要单行 */
+}
+.desc{
+  font-size:16px;          /* 同样放大 */
+  color:#666;
+  line-height:1.4;
+}
+.ani-btn{
+  background-size:300% 100%;
+  background-image:linear-gradient(45deg,#69bff9,#b96af3,#e9685e,#f2ac3e,#69bff9);
+  color:#fff;
+  border:.5px solid #fff6;
+  border-radius:4px;
+  padding:8px 18px;
+  font-size:14px;
+  cursor:pointer;
+  margin-top:12px;
+  transition:transform .18s cubic-bezier(.4,2,.6,1),box-shadow .18s;
+  box-shadow:0 1px 4px 0 #b96af355;
+  animation:rainbow 4s ease-in-out infinite;
+}
+.ani-btn:hover{
+  transform:scale(1.08) translateY(-2px);
+  box-shadow:0 4px 12px 0 #b96af399;
+}
+
+/* ===== 动画定义 ===== */
+@keyframes cardFadeIn{
+  0%{opacity:0;transform:scale(.9) translateY(20px);}
+  100%{opacity:1;transform:scale(1) translateY(0);}
+}
+@keyframes innerPop{
+  0%{opacity:0;transform:scale(.8);}
+  100%{opacity:1;transform:scale(1);}
+}
+@keyframes float{
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-3px);}
+}
+@keyframes shine{
+  0%{background-position:-60px;}
+  100%{background-position:160px;}
+}
+@keyframes rainbow{
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
+}
+
+.title::after{
+  content:'';
+  position:absolute;
+  top:0;left:-60px;bottom:0;
+  width:60px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.8),transparent);
+  animation:shine 3s linear infinite 1.5s;
+}
+</style>
+
+<script>
+/* 打字机效果 */
+const text = 'NoNoMi人生滤镜';
+const el = document.getElementById('title');
+let idx = 0;
+
+function type() {
+  if (idx < text.length) {
+    el.textContent += text.charAt(idx);
+    idx++;
+    setTimeout(type, 180);  
+  }
+}
+type();
+</script>
