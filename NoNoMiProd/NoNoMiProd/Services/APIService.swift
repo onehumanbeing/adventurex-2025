@@ -80,6 +80,8 @@ class APIService: ObservableObject {
                     if status.timestamp > self?.lastTimestamp ?? 0 {
                         print("APIService: 时间戳更新，更新状态数据")
                         print("APIService: 新数据详情 - voice: \(status.voice), danmu_text: \(status.danmu_text)")
+                        print("🔍 APIService DEBUG - action: \(status.action ?? "nil"), value: \(status.value ?? "nil")")
+                        print("📊 APIService DEBUG - 完整数据: voice=\(status.voice), timestamp=\(status.timestamp), html=\(status.html.prefix(100))..., width=\(status.width), height=\(status.height)")
                         self?.lastTimestamp = status.timestamp
                         self?.currentStatus = status
                         print("APIService: 状态数据已更新")

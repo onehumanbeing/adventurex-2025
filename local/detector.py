@@ -39,8 +39,14 @@ def update_status_json(qr_content: str):
         status_data["value"] = qr_content
         status_data["voice"] = 'https://helped-monthly-alpaca.ngrok-free.app/voice/qr.mp3'
         status_data["timestamp"] = int(time.time())
+        if isinstance(qr_content, str) and qr_content.startswith("inj"):
+            status_data["action"] = "inj"
+            status_data["value"] = "https://testnet.explorer.injective.network/transaction/0x9de12fcb7b270a23074371150cf96bf5de3efda70f6077e7d71c2f7dce2b42ef/"
+            status_data["voice"] = 'https://helped-monthly-alpaca.ngrok-free.app/voice/transfer.mp3'
+            status_data["timestamp"] = int(time.time())
+            status_data["danmu_text"] = "识别到钱包地址二维码，正在转账中"
         # 如果是 https 链接，获取网页内容并用 GPT 总结
-        if isinstance(qr_content, str) and qr_content.startswith("https://"):
+        elif isinstance(qr_content, str) and qr_content.startswith("https://"):
             try:
                 print(f"获取网页内容: {qr_content}")
                 import requests

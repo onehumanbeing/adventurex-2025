@@ -60,8 +60,8 @@ def t2a_minimax(
 
 if __name__ == "__main__":
     import sys
-    text = sys.argv[1] if len(sys.argv) > 1 else "诺诺米正在思考中"
+    text = sys.argv[1] if len(sys.argv) > 1 else "识别到钱包地址二维码，正在转账中"
     audio = t2a_minimax(text)
-    with open("cache/voice/pending.mp3", "wb") as f:
+    with open("cache/voice/transfer.mp3", "wb") as f:
         f.write(audio)
-    print("音频已保存为 pending.mp3")
+    print("音频已保存为 transfer.mp3")
