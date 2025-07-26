@@ -97,11 +97,6 @@ def reset_status():
         "voice": "https://helped-monthly-alpaca.ngrok-free.app/voice/hello.mp3",
         "timestamp": int(time.time()),
         "html": """
-<!DOCTYPE html>
-<html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Inspire · Creative · Enrich Life</title>
     <style>
       /* ================= 1. 全局 ================= */
       * {
@@ -585,11 +580,9 @@ def reset_status():
         renderer.setSize(innerWidth, innerHeight);
         explode.width = innerWidth;
         explode.height = innerHeight;
-      });
-    </script>
-  </body>
-</html>
-""",
+             });
+     </script>
+ """,
         "danmu_text": "QAQ",
         "height": 400,
         "width": 600
