@@ -96,7 +96,152 @@ def reset_status():
         "value": "",
         "voice": "https://helped-monthly-alpaca.ngrok-free.app/voice/hello.mp3",
         "timestamp": int(time.time()),
-        "html": "<div style='height: 100%; width: 100%; padding: 16px; background-color: white; border-radius: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); color: #007aff;'><h2 style='font-size: 20px; font-weight: bold; margin-bottom: 8px;'>时尚提示</h2><p style='margin-bottom: 16px;'>您对这件衣服感兴趣，请确认价格以便购买！</p><div style='margin-top: 16px;'><button style='background-color: #007aff; color: white; padding: 10px 20px; border-radius: 12px; border: none; cursor: pointer;'>查询价格</button></div></div>",
+        "html": """
+<div
+  style="
+    height: 100%;
+    width: 100%;
+    background: #232323;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  "
+>
+  <div
+    style="
+      background: linear-gradient(90deg, #6ec1e4 0%, #a259c6 50%, #ff6a3d 100%);
+      border-radius: 60px;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 480px;
+      min-height: 480px;
+      width: 540px;
+      height: 540px;
+      max-width: 90vw;
+      max-height: 90vh;
+      box-shadow: 0 4px 32px rgba(0, 0, 0, 0.4);
+    "
+  >
+    <div
+      style="
+        background: #232323;
+        border-radius: 54px;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      "
+    >
+      <div style="padding: 40px 40px 0 40px">
+        <span
+          style="
+            font-size: 56px;
+            font-weight: 700;
+            color: #98f7b3;
+            font-family: sans-serif;
+          "
+          >Hello</span
+        >
+      </div>
+      <div
+        style="
+          flex: 1;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        "
+      >
+        <span
+          style="
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+            font-family: sans-serif;
+            text-shadow: 0 2px 8px #000;
+          "
+          >正在为您分析当前场景信息</span
+        >
+      </div>
+      <div
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 32px 24px 32px;
+        "
+      >
+        <div>
+          <div style="color: #aaa; font-size: 15px; margin-bottom: 8px">
+            Searched On
+          </div>
+          <div style="display: flex; gap: 10px">
+            <a
+              href="#"
+              style="
+                background: #232b3e;
+                color: #fff;
+                border-radius: 8px;
+                padding: 6px 14px;
+                display: inline-flex;
+                align-items: center;
+                font-size: 15px;
+                text-decoration: none;
+              "
+              ><span style="margin-right: 6px">🅑</span>Behance</a
+            >
+            <a
+              href="#"
+              style="
+                background: #1a2634;
+                color: #fff;
+                border-radius: 8px;
+                padding: 6px 14px;
+                display: inline-flex;
+                align-items: center;
+                font-size: 15px;
+                text-decoration: none;
+              "
+              ><span style="margin-right: 6px">in</span>Linkedin</a
+            >
+            <a
+              href="#"
+              style="
+                background: #ea4c89;
+                color: #fff;
+                border-radius: 8px;
+                padding: 6px 14px;
+                display: inline-flex;
+                align-items: center;
+                font-size: 15px;
+                text-decoration: none;
+              "
+              ><span style="margin-right: 6px">🏀</span>Dribbble</a
+            >
+            <a
+              href="#"
+              style="
+                background: #1da1f2;
+                color: #fff;
+                border-radius: 8px;
+                padding: 6px 14px;
+                display: inline-flex;
+                align-items: center;
+                font-size: 15px;
+                text-decoration: none;
+              "
+              ><span style="margin-right: 6px">🐦</span>Twitter</a
+            >
+          </div>
+        </div>
+        <div style="align-self: flex-end"></div>
+      </div>
+    </div>
+  </div>
+</div>
+""",
         "danmu_text": "QAQ",
         "height": 400,
         "width": 600
