@@ -6,7 +6,15 @@ import time
 import base64
 import json
 import glob
+import uuid
+from datetime import datetime
 from generate_audio import t2a_minimax
+
+# 添加LocalTracer导入
+from local_tracer import LocalTracer
+
+# 初始化LocalTracer
+tracer = LocalTracer(storage_path="./cache/logs")
 
 # 服务器主机URL，用于构建音频文件的完整路径
 HOST_URL = "https://helped-monthly-alpaca.ngrok-free.app"
@@ -21,16 +29,21 @@ class HtmlView(BaseModel):
     html: str        # HTML内容
     danmu_text: str  # 弹幕文本
 
-def call_openai_api(messages):
+def call_openai_api(messages, thread_id=None):
     """
     调用OpenAI API进行图像和语音分析
     
     Args:
         messages: 包含系统提示、用户语音和图像的消息列表
+        thread_id: 线程ID，用于追踪对话
     
     Returns:
         HtmlView: 包含HTML界面和弹幕文本的响应对象
     """
+    # 如果没有提供thread_id，生成一个基于时间的唯一ID
+    if thread_id is None:
+        thread_id = f"local_thread_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+    
     client = OpenAI(timeout=30.0)  # 设置30秒超时
     try:
         # 使用OpenAI的解析功能，直接返回HtmlView对象
@@ -39,6 +52,11 @@ def call_openai_api(messages):
             messages=messages,
             response_format=HtmlView,
             max_tokens=10000,
+            # 添加回调处理器
+            extra_headers={
+                "langchain_callback_handlers": [tracer],
+                "langchain_metadata": {"thread_id": thread_id}
+            }
         )
         response = completion.choices[0].message.parsed
         return response
@@ -161,8 +179,11 @@ def periodic_ai_task():
         
         # 步骤5: 调用OpenAI API进行分析
         try:
-            result = call_openai_api(messages)
+            # 生成基于当前时间的thread_id
+            current_thread_id = f"local_brain_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}"
+            result = call_openai_api(messages, current_thread_id)
             print("AI HTML结果:", result)
+            print(f"Thread ID: {current_thread_id}")
             
             # 步骤6: 调用语音合成API生成音频
             if result.danmu_text != "":

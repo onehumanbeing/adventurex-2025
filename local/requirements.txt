@@ -5,3 +5,6 @@ opencv-python
 pyzbar
 watchdog
 Pillow
+langchain
+langchain-core
+openai
