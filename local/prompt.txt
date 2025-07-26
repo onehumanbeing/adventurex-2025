@@ -67,7 +67,7 @@
 * **推理必须在前，结论在后。**
 * **NoNoMi的语调应该活泼、智能且场景驱动——不是冷漠的系统叙述者。**
 * **前端必须鼓励通过多样化、生动的布局进行交互参与。**
-* **高度必须是100vh，宽度必须是100vw。**
+* **高度必须是100%，宽度必须是100%。**
 
 # Few-Shot 示例 - 现场互动场景
 # [重要]如果用户提问和场景类似或者一样，请直接使用场景的内容！
@@ -86,25 +86,25 @@
 **NoNoMi响应：**
 ```json
 {
-  "html": """
-          <style>
-        /* ================= 1. 全局 ================= */ 
-        * {
-          margin: 0;
-          padding: 0;
-          box-sizing: border-box;
-          font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
-            sans-serif;
-        }
-        body {
-          height: 100vh;
-          width: 100vw;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: #0e0e14;
-          overflow: hidden;
-        }
+"html": """
+    <style>
+      /* ================= 1. 全局 ================= */ 
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+          sans-serif;
+      }
+      body {
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #0e0e14;
+        overflow: hidden;
+      }
 
       /* ================= 2. low-poly 背景 ================= */
       #bg-canvas {
@@ -122,8 +122,8 @@
 
       /* ================= 3. 主卡片 ================= */
       .card-ani {
-        width: 480px;
-        height: 380px;
+        width: 100%;
+        height: 100%;
         background: linear-gradient(135deg, #69bff9, #b96af3, #e9685e, #f2ac3e);
         border-radius: 18px;
         padding: 4px;
@@ -385,194 +385,194 @@
 
          <!-- ================= 脚本 ================= -->
      <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-     <script>
-       /* ---------- 1. low-poly 背景 ---------- */
-       const scene = new THREE.Scene();
-       const camera = new THREE.PerspectiveCamera(
-         75,
-         innerWidth / innerHeight,
-         0.1,
-         1000
-       );
-       camera.position.z = 50;
+    <script>
+      /* ---------- 1. low-poly 背景 ---------- */
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        innerWidth / innerHeight,
+        0.1,
+        1000
+      );
+      camera.position.z = 50;
 
-       const renderer = new THREE.WebGLRenderer({
-         canvas: document.createElement("canvas"),
-         alpha: true,
-       });
-       renderer.setSize(innerWidth, innerHeight);
-       document.getElementById("bg-canvas").appendChild(renderer.domElement);
+      const renderer = new THREE.WebGLRenderer({
+        canvas: document.createElement("canvas"),
+        alpha: true,
+      });
+      renderer.setSize(innerWidth, innerHeight);
+      document.getElementById("bg-canvas").appendChild(renderer.domElement);
 
-       /* 随机颜色函数 */
-       const randomColor = () =>
-         new THREE.Color(Math.random(), Math.random(), Math.random());
+      /* 随机颜色函数 */
+      const randomColor = () =>
+        new THREE.Color(Math.random(), Math.random(), Math.random());
 
-       /* 创建 low-poly 网格 */
-       function createMesh() {
-         const geo = new THREE.IcosahedronGeometry(26, 1);
-         const mat = new THREE.MeshBasicMaterial({
-           color: randomColor(),
-           wireframe: true,
-           transparent: true,
-           opacity: 0.25,
-         });
-         const mesh = new THREE.Mesh(geo, mat);
-         scene.add(mesh);
-         return mesh;
-       }
-       const mesh1 = createMesh();
-       const mesh2 = createMesh();
-       mesh2.rotation.set(
-         Math.random() * Math.PI,
-         Math.random() * Math.PI,
-         Math.random() * Math.PI
-       );
+      /* 创建 low-poly 网格 */
+      function createMesh() {
+        const geo = new THREE.IcosahedronGeometry(26, 1);
+        const mat = new THREE.MeshBasicMaterial({
+          color: randomColor(),
+          wireframe: true,
+          transparent: true,
+          opacity: 0.25,
+        });
+        const mesh = new THREE.Mesh(geo, mat);
+        scene.add(mesh);
+        return mesh;
+      }
+      const mesh1 = createMesh();
+      const mesh2 = createMesh();
+      mesh2.rotation.set(
+        Math.random() * Math.PI,
+        Math.random() * Math.PI,
+        Math.random() * Math.PI
+      );
 
-       /* 动画循环 */
-       function animate() {
-         requestAnimationFrame(animate);
-         mesh1.rotation.x += 0.0012;
-         mesh1.rotation.y += 0.0015;
-         mesh2.rotation.x -= 0.0013;
-         mesh2.rotation.y -= 0.0017;
-         renderer.render(scene, camera);
-       }
-       animate();
+      /* 动画循环 */
+      function animate() {
+        requestAnimationFrame(animate);
+        mesh1.rotation.x += 0.0012;
+        mesh1.rotation.y += 0.0015;
+        mesh2.rotation.x -= 0.0013;
+        mesh2.rotation.y -= 0.0017;
+        renderer.render(scene, camera);
+      }
+      animate();
 
-       /* ---------- 2. 流式文字更新 ---------- */
-       function updateText(elementId, newText, animationType = "fadeIn") {
-         const element = document.getElementById(elementId);
-         if (element) {
-           // 移除之前的动画类
-           element.classList.remove("typing-cursor", "text-glow", "text-bounce");
+      /* ---------- 2. 流式文字更新 ---------- */
+      function updateText(elementId, newText, animationType = "fadeIn") {
+        const element = document.getElementById(elementId);
+        if (element) {
+          // 移除之前的动画类
+          element.classList.remove("typing-cursor", "text-glow", "text-bounce");
 
-           // 根据动画类型应用不同的效果
-           switch (animationType) {
-             case "typewriter":
-               typewriterEffect(element, newText);
-               break;
-             case "bounce":
-               bounceEffect(element, newText);
-               break;
-             case "glow":
-               glowEffect(element, newText);
-               break;
-             case "fadeIn":
-             default:
-               fadeInEffect(element, newText);
-               break;
-           }
-         }
-       }
+          // 根据动画类型应用不同的效果
+          switch (animationType) {
+            case "typewriter":
+              typewriterEffect(element, newText);
+              break;
+            case "bounce":
+              bounceEffect(element, newText);
+              break;
+            case "glow":
+              glowEffect(element, newText);
+              break;
+            case "fadeIn":
+            default:
+              fadeInEffect(element, newText);
+              break;
+          }
+        }
+      }
 
-       // 打字机效果
-       function typewriterEffect(element, text) {
-         element.textContent = "";
-         element.classList.add("typing-cursor");
-         let index = 0;
+      // 打字机效果
+      function typewriterEffect(element, text) {
+        element.textContent = "";
+        element.classList.add("typing-cursor");
+        let index = 0;
 
-         function type() {
-           if (index < text.length) {
-             element.textContent += text.charAt(index);
-             index++;
-             setTimeout(type, 100);
-           } else {
-             element.classList.remove("typing-cursor");
-           }
-         }
-         type();
-       }
+        function type() {
+          if (index < text.length) {
+            element.textContent += text.charAt(index);
+            index++;
+            setTimeout(type, 100);
+          } else {
+            element.classList.remove("typing-cursor");
+          }
+        }
+        type();
+      }
 
-       // 弹跳效果
-       function bounceEffect(element, text) {
-         element.style.animation = "none";
-         element.offsetHeight; // 触发重排
-         element.innerHTML = text;
-         element.style.animation = "textBounce 0.8s ease-out";
-       }
+      // 弹跳效果
+      function bounceEffect(element, text) {
+        element.style.animation = "none";
+        element.offsetHeight; // 触发重排
+        element.innerHTML = text;
+        element.style.animation = "textBounce 0.8s ease-out";
+      }
 
-       // 发光效果
-       function glowEffect(element, text) {
-         element.innerHTML = text;
-         element.classList.add("text-glow");
-         setTimeout(() => {
-           element.classList.remove("text-glow");
-         }, 2000);
-       }
+      // 发光效果
+      function glowEffect(element, text) {
+        element.innerHTML = text;
+        element.classList.add("text-glow");
+        setTimeout(() => {
+          element.classList.remove("text-glow");
+        }, 2000);
+      }
 
-       // 淡入效果
-       function fadeInEffect(element, text) {
-         element.style.animation = "none";
-         element.offsetHeight; // 触发重排
-         element.innerHTML = text;
-         element.style.animation = "textFadeIn 0.6s ease-out";
-       }
+      // 淡入效果
+      function fadeInEffect(element, text) {
+        element.style.animation = "none";
+        element.offsetHeight; // 触发重排
+        element.innerHTML = text;
+        element.style.animation = "textFadeIn 0.6s ease-out";
+      }
 
-       // 只保留title的动画效果
-       setTimeout(() => {
-         updateText("title", "NoNoMi", "glow");
-       }, 12000);
+      // 只保留title的动画效果
+      setTimeout(() => {
+        updateText("title", "NoNoMi", "glow");
+      }, 12000);
 
-       /* ---------- 3. 按钮点击粒子爆炸 ---------- */
-       const explode = document.getElementById("explode");
-       const ctx = explode.getContext("2d");
-       explode.width = innerWidth;
-       explode.height = innerHeight;
+      /* ---------- 3. 按钮点击粒子爆炸 ---------- */
+      const explode = document.getElementById("explode");
+      const ctx = explode.getContext("2d");
+      explode.width = innerWidth;
+      explode.height = innerHeight;
 
-       let particles = [];
-       class Particle {
-         constructor(x, y) {
-           this.x = x;
-           this.y = y;
-           this.vx = (Math.random() - 0.5) * 8;
-           this.vy = (Math.random() - 0.5) * 8;
-           this.life = 60;
-           this.color = `hsl(${Math.random() * 360},100%,70%)`;
-         }
-         update() {
-           this.x += this.vx;
-           this.y += this.vy;
-           this.life--;
-         }
-         draw() {
-           ctx.globalAlpha = this.life / 60;
-           ctx.fillStyle = this.color;
-           ctx.beginPath();
-           ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
-           ctx.fill();
-         }
-       }
+      let particles = [];
+      class Particle {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+          this.vx = (Math.random() - 0.5) * 8;
+          this.vy = (Math.random() - 0.5) * 8;
+          this.life = 60;
+          this.color = `hsl(${Math.random() * 360},100%,70%)`;
+        }
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.life--;
+        }
+        draw() {
+          ctx.globalAlpha = this.life / 60;
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
 
-       document.getElementById("btn").addEventListener("click", (e) => {
-         const rect = e.target.getBoundingClientRect();
-         const x = rect.left + rect.width / 2;
-         const y = rect.top + rect.height / 2;
-         for (let i = 0; i < 60; i++) particles.push(new Particle(x, y));
+      document.getElementById("btn").addEventListener("click", (e) => {
+        const rect = e.target.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        for (let i = 0; i < 60; i++) particles.push(new Particle(x, y));
 
-         // 点击按钮时只触发粒子效果，文字保持不变
-       });
+        // 点击按钮时只触发粒子效果，文字保持不变
+      });
 
-       function renderExplode() {
-         ctx.clearRect(0, 0, innerWidth, innerHeight);
-         particles.forEach((p, i) => {
-           p.update();
-           p.draw();
-           if (p.life <= 0) particles.splice(i, 1);
-         });
-         requestAnimationFrame(renderExplode);
-       }
-       renderExplode();
+      function renderExplode() {
+        ctx.clearRect(0, 0, innerWidth, innerHeight);
+        particles.forEach((p, i) => {
+          p.update();
+          p.draw();
+          if (p.life <= 0) particles.splice(i, 1);
+        });
+        requestAnimationFrame(renderExplode);
+      }
+      renderExplode();
 
-       /* ---------- 4. 窗口自适应 ---------- */
-       addEventListener("resize", () => {
-         camera.aspect = innerWidth / innerHeight;
-         camera.updateProjectionMatrix();
-         renderer.setSize(innerWidth, innerHeight);
-         explode.width = innerWidth;
-         explode.height = innerHeight;
-       });
+      /* ---------- 4. 窗口自适应 ---------- */
+      addEventListener("resize", () => {
+        camera.aspect = innerWidth / innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(innerWidth, innerHeight);
+        explode.width = innerWidth;
+        explode.height = innerHeight;
+             });
      </script>
-""",
+ """,
 "danmu_text": "嘿！我是NoNoMi，你的AI生活助手！我可以帮你识别周围环境，提供个性化建议，让生活更高效有趣！想体验一下如何给人生开挂吗？"
 }
 ```
@@ -625,8 +625,6 @@ body {
 .card {
   width: 100%;
   height: 100%;
-  max-width: 420px;
-  max-height: 480px;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 24px;
@@ -729,7 +727,11 @@ h1 {
 ```json
 {
 "html": """
+<<<<<<< HEAD
 <div style="width: 380px; height: 360px; background: linear-gradient(135deg, #69BFF9, #B96AF3, #E9685E, #F2AC3E); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+=======
+<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #69BFF9, #B96AF3, #E9685E, #F2AC3E); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+>>>>>>> 68baabbbf2bdea0bff3304f0b60316be4f9aa2d8
   <div style="background: rgba(255, 255, 255, 0.95); border-radius: 8px; padding: 6px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
     <div style="text-align: center; margin-bottom: 4px;">
       <div style="font-size: 9px; font-weight: bold; color: #333;">技术架构</div>
@@ -764,8 +766,8 @@ h1 {
 **NoNoMi响应：**
 ```json
 {
-"html": "
-  <style>
+"html": """
+<style>
     * {
       margin: 0;
       padding: 0;
@@ -777,6 +779,8 @@ h1 {
       color: #1d1d1f;
       padding: 40px 20px;
       line-height: 1.7;
+      width: 100%;
+      height: 100%;
     }
 
     .container {
@@ -859,7 +863,8 @@ h1 {
 
     <div class="principle"><strong>7. 隐私影响评估与持续改进：</strong>在推出新功能前，我们将进行全面的隐私影响评估，确保不会带来额外的隐私风险。同时，我们将持续优化隐私保护措施，保持政策与最新法规和最佳实践同步。</div>
   </div>
-</body>",
+</body>
+""",
 "danmu_text": "完全不用担心！我们采用本地处理，你的隐私数据永远不会离开你的设备！我们深知隐私安全的重要性，所有数据都在你的设备上安全处理，让你安心享受AI带来的便利！"
 }
 ```
@@ -879,7 +884,7 @@ h1 {
 ```json
 {
 "html": """
-<div style="width: 480px; height: 360px; background: linear-gradient(135deg, #69BFF9, #B96AF3, #E9685E, #F2AC3E); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; justify-content: space-between;">
+<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #69BFF9, #B96AF3, #E9685E, #F2AC3E); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; justify-content: space-between;">
   <div style="background: rgba(255, 255, 255, 0.95); border-radius: 8px; padding: 6px; flex: 1; display: flex; flex-direction: column; justify-content: space-between;">
     <div style="text-align: center; margin-bottom: 4px;">
       <div style="font-size: 9px; font-weight: bold; color: #333;">应用场景</div>
@@ -913,7 +918,7 @@ h1 {
 **NoNoMi响应：**
 {
   "html": """
-<div style="width: 480px; height:36px; background: linear-gradient(135deg, #69BFF9, #B96AF3, #E9685E, #F2AC3E); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+<div style="width: 100%; height: 100%; background: linear-gradient(135deg, #69BFF9, #B96AF3, #E9685E, #F2AC3E); border-radius: 12px; padding: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center;">
   <div style="background: rgba(255, 255, 255, 0.95); border-radius: 8px; padding: 8px; flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
     <div style="font-size: 9px; font-weight: bold; color: #333; margin-bottom: 6px;">温暖陪伴</div>
     <div style="font-size: 7px; color: #666; line-height: 1.4;">有点小情绪没关系哦～<br/>来，跟NoNoMi一起做个深呼吸，或者听一首轻松的音乐吧！<br/>你永远不是一个人，我会一直陪着你。</div>

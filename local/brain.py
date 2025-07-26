@@ -594,6 +594,7 @@ def periodic_ai_task():
     AI_TIME_INTERVAL = int(os.environ.get("AI_TIME_INTERVAL", 5))
     SCREENSHOT_UPLOAD_AMOUNT = int(os.environ.get("SCREENSHOT_UPLOAD_AMOUNT", 1))
     USE_CAMERA = int(os.environ.get("USE_CAMERA", 0))
+    USE_IMAGES = int(os.environ.get("USE_IMAGES", 0))  # 新增图片开关，默认0
     if USE_CAMERA == 1:
         IMAGE_DIR = os.path.join(".", "cache", "camera")
     else:
@@ -648,11 +649,11 @@ def periodic_ai_task():
                 
                 if not finished_result.result:
                     print("❌音频内容不需要触发AI回复，跳过本次处理")
-                    # 检查如果audio.txt的行数大于10行，则清空
+                    # 检查如果audio.txt的行数大于5行，则清空
                     if os.path.exists(AUDIO_TXT_PATH):
                         with open(AUDIO_TXT_PATH, "r", encoding="utf-8") as f:
                             lines = f.readlines()
-                            if len(lines) > 10:
+                            if len(lines) > 5: # 如果行数大于5行，则清空
                                 with open(AUDIO_TXT_PATH, "w", encoding="utf-8") as f:
                                     f.write("")
                     time.sleep(3)
@@ -677,79 +678,89 @@ def periodic_ai_task():
         else:
             print("缺少finished prompt，跳过判断步骤")
 
-        # 步骤2: 如果有图片，则获取图片数量并且解析
-        image_files = glob.glob(os.path.join(IMAGE_DIR, "*"))
-        image_files = [f for f in image_files if os.path.isfile(f)]
-        image_files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
-        latest_images = image_files[:SCREENSHOT_UPLOAD_AMOUNT]
-
+        # 步骤2: 图片分析开关
+        image_files = []
+        latest_images = []
         image_messages = []
-        if len(image_files) > 0:
-            print(f"检测到 {len(image_files)} 张图片，开始处理")
-            for img_path in latest_images:
-                try:
-                    with open(img_path, "rb") as f:
-                        b64_img = base64.b64encode(f.read()).decode("utf-8")
-                    image_messages.append({
-                        "type": "image_url",
-                        "image_url": {"url": f"data:image/jpeg;base64,{b64_img}"}
-                    })
-                except Exception as e:
-                    print(f"读取图片失败: {img_path}, {e}")
-        else:
-            print("未检测到图片，跳过图片处理步骤")
+        prompt_image = ""
+        screen_description = None
+        image_analysis_error = False
 
+        if USE_IMAGES == 1:
+            # 只有USE_IMAGES为1时才进行图片相关处理
+            image_files = glob.glob(os.path.join(IMAGE_DIR, "*"))
+            image_files = [f for f in image_files if os.path.isfile(f)]
+            image_files.sort(key=lambda x: os.path.getmtime(x), reverse=True)
+            latest_images = image_files[:SCREENSHOT_UPLOAD_AMOUNT]
+
+            if len(image_files) > 0:
+                print(f"检测到 {len(image_files)} 张图片，开始处理")
+                for img_path in latest_images:
+                    try:
+                        with open(img_path, "rb") as f:
+                            b64_img = base64.b64encode(f.read()).decode("utf-8")
+                        image_messages.append({
+                            "type": "image_url",
+                            "image_url": {"url": f"data:image/jpeg;base64,{b64_img}"}
+                        })
+                    except Exception as e:
+                        print(f"读取图片失败: {img_path}, {e}")
+            else:
+                print("未检测到图片，跳过图片处理步骤")
+
+            try:
+                with open(PROMPT_IMAGE_PATH, "r", encoding="utf-8") as f:
+                    prompt_image = f.read().strip()
+            except Exception as e:
+                print(f"读取prompt_image.txt失败: {e}")
+                prompt_image = ""
+
+            t1 = time.time()
+            if prompt_image and image_messages:
+                image_analysis_messages = [
+                    {"role": "system", "content": prompt_image},
+                    {"role": "user", "content": image_messages},
+                    {"role": "user", "content": f"audio: {audio_content}"}
+                ]
+                print("开始图片细节分析请求", latest_images, audio_content)
+                try:
+                    response, err = call_openai_api(
+                        image_analysis_messages,
+                        response_format="text",
+                        max_tokens=500  # 图片分析文本，通常500个token足够描述图片
+                    )
+                    t2 = time.time()
+                    print("✅ 图片细节分析结果:", response)
+                    print(f"图片细节分析耗时: {t2-t1:.2f}秒")
+                    if err is not None:
+                        print("图片细节分析请求异常:", err)
+                        image_analysis_error = True
+                    elif isinstance(response, str):
+                        screen_description = response
+                    elif hasattr(response, "content"):
+                        screen_description = getattr(response, "content", None)
+                    else:
+                        screen_description = str(response)
+                except Exception as e:
+                    t2 = time.time()
+                    print(f"图片细节分析请求异常: {e}")
+                    print(f"图片细节分析耗时: {t2-t1:.2f}秒")
+                    image_analysis_error = True
+            else:
+                t2 = time.time()
+                print("未能进行图片细节分析（缺少prompt_image或图片）")
+                image_analysis_error = True
+        else:
+            print("USE_IMAGES=0，跳过图片分析步骤")
+            image_analysis_error = True  # 强制不加图片分析结果
+
+        # 步骤3: 主请求
         try:
             with open(PROMPT_PATH, "r", encoding="utf-8") as f:
                 system_prompt = f.read().strip()
         except Exception as e:
             print(f"读取prompt.txt失败: {e}")
             system_prompt = ""
-
-        try:
-            with open(PROMPT_IMAGE_PATH, "r", encoding="utf-8") as f:
-                prompt_image = f.read().strip()
-        except Exception as e:
-            print(f"读取prompt_image.txt失败: {e}")
-            prompt_image = ""
-
-        screen_description = None
-        image_analysis_error = False
-        t1 = time.time()
-        if prompt_image and image_messages:
-            image_analysis_messages = [
-                {"role": "system", "content": prompt_image},
-                {"role": "user", "content": image_messages},
-                {"role": "user", "content": f"audio: {audio_content}"}
-            ]
-            print("开始图片细节分析请求", latest_images, audio_content)
-            try:
-                response, err = call_openai_api(
-                    image_analysis_messages,
-                    response_format="text",
-                    max_tokens=500  # 图片分析文本，通常500个token足够描述图片
-                )
-                t2 = time.time()
-                print("✅ 图片细节分析结果:", response)
-                print(f"图片细节分析耗时: {t2-t1:.2f}秒")
-                if err is not None:
-                    print("图片细节分析请求异常:", err)
-                    image_analysis_error = True
-                elif isinstance(response, str):
-                    screen_description = response
-                elif hasattr(response, "content"):
-                    screen_description = getattr(response, "content", None)
-                else:
-                    screen_description = str(response)
-            except Exception as e:
-                t2 = time.time()
-                print(f"图片细节分析请求异常: {e}")
-                print(f"图片细节分析耗时: {t2-t1:.2f}秒")
-                image_analysis_error = True
-        else:
-            t2 = time.time()
-            print("未能进行图片细节分析（缺少prompt_image或图片）")
-            image_analysis_error = True
 
         messages = []
         if system_prompt:
@@ -763,7 +774,10 @@ def periodic_ai_task():
         if not image_analysis_error and screen_description:
             messages.append({"role": "user", "content": f"screen_description: {screen_description}"})
         else:
-            print("图片分析失败，不传递图片信息给主请求。")
+            if USE_IMAGES == 1:
+                print("图片分析失败，不传递图片信息给主请求。")
+            else:
+                print("图片分析被关闭，不传递图片信息给主请求。")
         
         if not messages:
             print("没有可用的输入，跳过本次调用。")
@@ -800,8 +814,8 @@ def periodic_ai_task():
                 "timestamp": int(time.time()),
                 "html": getattr(result, "html", ""),
                 "danmu_text": getattr(result, "danmu_text", ""),
-                "height": getattr(result, "height", 400),
-                "width": getattr(result, "width", 600),
+                "height": 600 # getattr(result, "height", 400),
+                "width": 400 # getattr(result, "width", 600),
                 "action": "render",
                 "value": ""
             }
@@ -823,7 +837,7 @@ def periodic_ai_task():
                 f.write(html_content)
             print(f"HTML已保存到: {html_path}")
 
-            if int(os.environ.get("DELETE_IMAGE_AFTER_PROCESS", 0)) == 1:
+            if int(os.environ.get("DELETE_IMAGE_AFTER_PROCESS", 0)) == 1 and USE_IMAGES == 1:
                 for img_path in image_files:
                     try:
                         os.remove(img_path)
