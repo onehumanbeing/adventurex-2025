@@ -78,6 +78,9 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        opacity: 0;
+        transform: translateY(-20px);
+        animation: titleFlyIn 1s ease-out 0.5s forwards;
       }
       .desc {
         font-size: 18px;
@@ -88,6 +91,23 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        opacity: 0;
+        transform: translateX(-30px);
+        animation: descSlideIn 1s ease-out 1s forwards;
+      }
+      .sub-desc {
+        font-size: 16px;
+        color: #777;
+        line-height: 1.4;
+        max-width: 380px;
+        min-height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transform: translateX(30px);
+        animation: descSlideIn 1s ease-out 1.5s forwards;
+        margin-top: 8px;
       }
       /* 爆炸粒子 */
       #explode {
@@ -168,6 +188,92 @@
           background-position: 0% 50%;
         }
       }
+
+      /* 新增文字动画 */
+      @keyframes titleFlyIn {
+        0% {
+          opacity: 0;
+          transform: translateY(-20px) scale(0.8);
+        }
+        50% {
+          opacity: 0.7;
+          transform: translateY(-5px) scale(1.1);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      @keyframes descSlideIn {
+        0% {
+          opacity: 0;
+          transform: translateX(-30px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      @keyframes textFadeIn {
+        0% {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes textBounce {
+        0% {
+          opacity: 0;
+          transform: scale(0.3);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.05);
+        }
+        70% {
+          transform: scale(0.9);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      @keyframes textGlow {
+        0%,
+        100% {
+          text-shadow: 0 0 5px rgba(105, 191, 249, 0.5);
+        }
+        50% {
+          text-shadow: 0 0 20px rgba(105, 191, 249, 0.8),
+            0 0 30px rgba(105, 191, 249, 0.6);
+        }
+      }
+
+      /* 打字机光标 */
+      .typing-cursor::after {
+        content: "|";
+        animation: blink 1s infinite;
+        color: #69bff9;
+        font-weight: bold;
+      }
+
+      @keyframes blink {
+        0%,
+        50% {
+          opacity: 1;
+        }
+        51%,
+        100% {
+          opacity: 0;
+        }
+      }
     </style>
   </head>
   <body>
@@ -178,9 +284,8 @@
     <div class="card-ani">
       <div class="card-inner">
         <div class="title" id="title">NoNoMi 人生滤镜</div>
-        <div class="desc" id="desc">
-          给人生开挂的 AI 助手<br />让每一天更智能、更有趣
-        </div>
+        <div class="desc" id="desc">激发创造 • 丰富生活</div>
+        <div class="sub-desc" id="sub-desc">构建AGI森林🌳</div>
         <a
           href="https://www.xiaohongshu.com/user/profile/620103f00000000021029b87?xsec_token=YBwTrdN0RlEzIjqWDoW7NrR9KQeXLfFH4_64sZWEgYH1g=&xsec_source=app_share&xhsshare=CopyLink&appuid=620103f00000000021029b87&apptime=1753543002&share_id=4ed639c86e0a451dad4f0e5a53ea7688"
           target="_blank"
@@ -251,34 +356,77 @@
       animate();
 
       /* ---------- 2. 流式文字更新 ---------- */
-      function updateText(elementId, newText) {
+      function updateText(elementId, newText, animationType = "fadeIn") {
         const element = document.getElementById(elementId);
         if (element) {
-          element.innerHTML = newText;
+          // 移除之前的动画类
+          element.classList.remove("typing-cursor", "text-glow", "text-bounce");
+
+          // 根据动画类型应用不同的效果
+          switch (animationType) {
+            case "typewriter":
+              typewriterEffect(element, newText);
+              break;
+            case "bounce":
+              bounceEffect(element, newText);
+              break;
+            case "glow":
+              glowEffect(element, newText);
+              break;
+            case "fadeIn":
+            default:
+              fadeInEffect(element, newText);
+              break;
+          }
         }
       }
 
-      // 模拟流式更新
-      setTimeout(() => {
-        updateText(
-          "desc",
-          "Creativity is intelligence having fun.<br>创造力是智慧在玩耍。"
-        );
-      }, 3000);
+      // 打字机效果
+      function typewriterEffect(element, text) {
+        element.textContent = "";
+        element.classList.add("typing-cursor");
+        let index = 0;
 
-      setTimeout(() => {
-        updateText(
-          "desc",
-          "Life is not about finding yourself.<br>Life is about creating yourself.<br>生活不是寻找自己，而是创造自己。"
-        );
-      }, 8000);
+        function type() {
+          if (index < text.length) {
+            element.textContent += text.charAt(index);
+            index++;
+            setTimeout(type, 100);
+          } else {
+            element.classList.remove("typing-cursor");
+          }
+        }
+        type();
+      }
 
+      // 弹跳效果
+      function bounceEffect(element, text) {
+        element.style.animation = "none";
+        element.offsetHeight; // 触发重排
+        element.innerHTML = text;
+        element.style.animation = "textBounce 0.8s ease-out";
+      }
+
+      // 发光效果
+      function glowEffect(element, text) {
+        element.innerHTML = text;
+        element.classList.add("text-glow");
+        setTimeout(() => {
+          element.classList.remove("text-glow");
+        }, 2000);
+      }
+
+      // 淡入效果
+      function fadeInEffect(element, text) {
+        element.style.animation = "none";
+        element.offsetHeight; // 触发重排
+        element.innerHTML = text;
+        element.style.animation = "textFadeIn 0.6s ease-out";
+      }
+
+      // 只保留title的动画效果
       setTimeout(() => {
-        updateText("title", "NoNoMi 已激活！");
-        updateText(
-          "desc",
-          "Inspire Creativity • Enrich Life<br>激发创造 • 丰富生活"
-        );
+        updateText("title", "NoNoMi", "glow");
       }, 12000);
 
       /* ---------- 3. 按钮点击粒子爆炸 ---------- */
@@ -317,12 +465,7 @@
         const y = rect.top + rect.height / 2;
         for (let i = 0; i < 60; i++) particles.push(new Particle(x, y));
 
-        // 点击时更新文字
-        updateText("title", "NoNoMi 已激活！");
-        updateText(
-          "desc",
-          "The future belongs to those who believe in the beauty of their dreams.<br>未来属于那些相信梦想之美的人。"
-        );
+        // 点击按钮时只触发粒子效果，文字保持不变
       });
 
       function renderExplode() {

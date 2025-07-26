@@ -154,6 +154,7 @@ def reset_status():
         style="
           flex: 1;
           display: flex;
+          flex-direction: column;
           align-items: center;
           justify-content: center;
         "
@@ -171,6 +172,22 @@ def reset_status():
             display: flex;
             align-items: center;
             justify-content: center;
+          "
+        ></div>
+        <div
+          id="sub-desc"
+          style="
+            font-size: 24px;
+            font-weight: 600;
+            color: #ccc;
+            font-family: sans-serif;
+            text-shadow: 0 2px 8px #000;
+            text-align: center;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 8px;
           "
         ></div>
       </div>
@@ -268,29 +285,92 @@ def reset_status():
 
 <script>
 // 流式文字更新函数
-function updateText(elementId, newText) {
+function updateText(elementId, newText, animationType = 'fadeIn') {
   const element = document.getElementById(elementId);
   if (element) {
-    element.innerHTML = newText;
+    // 移除之前的动画类
+    element.classList.remove('typing-cursor', 'text-glow', 'text-bounce');
+    
+    // 根据动画类型应用不同的效果
+    switch(animationType) {
+      case 'typewriter':
+        typewriterEffect(element, newText);
+        break;
+      case 'bounce':
+        bounceEffect(element, newText);
+        break;
+      case 'glow':
+        glowEffect(element, newText);
+        break;
+      case 'fadeIn':
+      default:
+        fadeInEffect(element, newText);
+        break;
+    }
   }
 }
 
-// 初始化文字
-updateText('title', 'Hello!');
-updateText('desc', '正在为您分析当前场景信息');
+// 打字机效果
+function typewriterEffect(element, text) {
+  element.textContent = '';
+  element.classList.add('typing-cursor');
+  let index = 0;
+  
+  function type() {
+    if (index < text.length) {
+      element.textContent += text.charAt(index);
+      index++;
+      setTimeout(type, 100);
+    } else {
+      element.classList.remove('typing-cursor');
+    }
+  }
+  type();
+}
 
-// 模拟流式更新
+// 弹跳效果
+function bounceEffect(element, text) {
+  element.style.animation = 'none';
+  element.offsetHeight; // 触发重排
+  element.innerHTML = text;
+  element.style.animation = 'textBounce 0.8s ease-out';
+}
+
+// 发光效果
+function glowEffect(element, text) {
+  element.innerHTML = text;
+  element.classList.add('text-glow');
+  setTimeout(() => {
+    element.classList.remove('text-glow');
+  }, 2000);
+}
+
+// 淡入效果
+function fadeInEffect(element, text) {
+  element.style.animation = 'none';
+  element.offsetHeight; // 触发重排
+  element.innerHTML = text;
+  element.style.animation = 'textFadeIn 0.6s ease-out';
+}
+
+// 初始化文字
+updateText('title', 'Hello!', 'bounce');
+updateText('desc', '正在为您分析当前场景信息', 'fadeIn');
+updateText('sub-desc', '构建AGI森林🌳', 'fadeIn');
+
+// 模拟流式更新 - 使用不同动画效果
 setTimeout(() => {
-  updateText('desc', 'Creativity is intelligence having fun.<br>创造力是智慧在玩耍。');
+  updateText('desc', '创造力是智慧在玩耍', 'typewriter');
 }, 3000);
 
 setTimeout(() => {
-  updateText('desc', 'Life is not about finding yourself.<br>Life is about creating yourself.<br>生活不是寻找自己，而是创造自己。');
+  updateText('desc', '生活不是寻找自己，而是创造自己', 'bounce');
 }, 8000);
 
 setTimeout(() => {
-  updateText('title', 'NoNoMi 已激活！');
-  updateText('desc', 'Inspire Creativity • Enrich Life<br>激发创造 • 丰富生活');
+  updateText('title', 'NoNomi', 'glow');
+  updateText('desc', '激发创造 • 丰富生活', 'fadeIn');
+  updateText('sub-desc', '构建AGI森林🌳', 'fadeIn');
 }, 12000);
 </script>
 """,
