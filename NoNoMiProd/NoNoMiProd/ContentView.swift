@@ -44,16 +44,16 @@ struct ContentView: View {
                 StatusIndicatorView(apiService: apiService)
                     .transition(.opacity.combined(with: .scale))
                 
-                // HTML内容 - 移到左边
-                if let status = apiService.currentStatus {
+                // HTML内容 - 移到左边，当action为qr或inj时隐藏
+                if let status = apiService.currentStatus, status.action != "qr" && status.action != "inj" {
                     HTMLWidgetView(
                         html: status.html,
                         width: status.width,
                         height: status.height
                     )
                     .transition(.opacity.combined(with: .scale))
-                } else {
-                    // 显示占位符
+                } else if apiService.currentStatus == nil {
+                    // 显示占位符 - 只在没有数据时显示
                     VStack {
                         Image(systemName: "doc.text")
                             .font(.system(size: 29)) // 增加图标尺寸 (24 * 1.2)
