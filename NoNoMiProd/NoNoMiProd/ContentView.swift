@@ -12,12 +12,36 @@ import RealityKitContent
 struct ContentView: View {
     @StateObject private var apiService = APIService()
     @StateObject private var audioPlayer = AudioPlayer()
+    @StateObject private var walletService = CryptoWalletService()
     @State private var showQRWebView = false
     @State private var qrURL = ""
+    @State private var showTransferView = false
+    @State private var transferChain: CryptoChain = .injective
     
     var body: some View {
         ZStack {
             // 移除背景3D场景，让用户有更大的视野
+            
+            // 钱包组件 - 右上角
+            VStack {
+                HStack {
+                    Spacer()
+                    WalletView(walletService: walletService)
+                        .padding(.top, 40)
+                        .padding(.trailing, 40)
+                }
+                Spacer()
+            }
+            
+            // 悬浮转账按钮 - 屏幕正前方
+            if showTransferView {
+                VStack {
+                    Spacer()
+                    TransferFloatingView(chain: transferChain, walletService: walletService)
+                    Spacer()
+                }
+                .transition(.scale.combined(with: .opacity))
+            }
             
             // 调整布局：将UI移到更靠左的位置
             VStack(alignment: .leading, spacing: 20) { // 改为左对齐
@@ -170,6 +194,23 @@ struct ContentView: View {
                         showQRWebView = true
                     }
                 }
+                // 检查是否为加密货币转账action
+                else if status.action == "inj" {
+                    print("检测到Injective转账action，显示转账界面...")
+                    transferChain = .injective
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        showTransferView = true
+                        showQRWebView = false
+                    }
+                }
+                else if status.action == "bnb" {
+                    print("检测到BNB转账action，显示转账界面...")
+                    transferChain = .bnb
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        showTransferView = true
+                        showQRWebView = false
+                    }
+                }
                 // 其他action或无action时，也播放语音（兼容性处理）
                 else {
                     print("检测到其他action或无action，播放音频...")
@@ -186,6 +227,13 @@ struct ContentView: View {
                             showQRWebView = false
                         }
                     }
+                    
+                    // 如果不是转账action，隐藏转账视图
+                    if showTransferView {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            showTransferView = false
+                        }
+                    }
                 }
             } else {
                 print("状态数据为空")
@@ -199,6 +247,7 @@ struct ContentView: View {
         .animation(.easeInOut(duration: 0.3), value: apiService.currentStatus)
         .animation(.easeInOut(duration: 0.3), value: apiService.error)
         .animation(.easeInOut(duration: 0.3), value: showQRWebView)
+        .animation(.easeInOut(duration: 0.3), value: showTransferView)
     }
 }
 
