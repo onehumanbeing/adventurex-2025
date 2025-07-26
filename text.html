@@ -1,117 +1,349 @@
-<div class="card-ani">
-  <div class="card-inner">
-    <div class="title" id="title"></div>
-    <div class="desc">给人生开挂的 AI 助手<br/>让生活更智能有趣</div>
-    <button class="ani-btn">了解更多</button>
-  </div>
-</div>
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Inspire · Creative · Enrich Life</title>
+    <style>
+      /* ================= 1. 全局 ================= */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+          sans-serif;
+      }
+      body {
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #0e0e14;
+        overflow: hidden;
+      }
 
-<style>
-.card-ani{
-  width:450px;
-  height:360px;
-  background:linear-gradient(135deg,#69bff9,#b96af3,#e9685e,#f2ac3e);
-  border-radius:12px;
-  padding:4px;
-  display:flex;
-  flex-direction:column;
-  justify-content:space-between;
-  border:1px solid #fff3;
-  box-shadow:0 2px 12px 0 #b96af355;
-  animation:cardFadeIn .8s cubic-bezier(.4,2,.6,1) 1,
-            float   3s ease-in-out infinite .8s;
-}
-.card-inner{
-  background:rgba(255,255,255,.95);
-  border-radius:8px;
-  padding:6px;
-  flex:1;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-  align-items:center;
-  text-align:center;
-  animation:innerPop .7s cubic-bezier(.4,2,.6,1) 1;
-}
-.title{
-  font-size:28px;          /* 明显放大 */
-  font-weight:bold;
-  color:#333;
-  margin-bottom:10px;
-  position:relative;
-  overflow:hidden;
-  height:34px;             /* 保证垂直不抖动 */
-  white-space:nowrap;      /* 打字机需要单行 */
-}
-.desc{
-  font-size:16px;          /* 同样放大 */
-  color:#666;
-  line-height:1.4;
-}
-.ani-btn{
-  background-size:300% 100%;
-  background-image:linear-gradient(45deg,#69bff9,#b96af3,#e9685e,#f2ac3e,#69bff9);
-  color:#fff;
-  border:.5px solid #fff6;
-  border-radius:4px;
-  padding:8px 18px;
-  font-size:14px;
-  cursor:pointer;
-  margin-top:12px;
-  transition:transform .18s cubic-bezier(.4,2,.6,1),box-shadow .18s;
-  box-shadow:0 1px 4px 0 #b96af355;
-  animation:rainbow 4s ease-in-out infinite;
-}
-.ani-btn:hover{
-  transform:scale(1.08) translateY(-2px);
-  box-shadow:0 4px 12px 0 #b96af399;
-}
+      /* ================= 2. low-poly 背景 ================= */
+      #bg-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        opacity: 0.8;
+      }
+      #bg-canvas canvas {
+        transform: scale(1.05);
+      }
 
-/* ===== 动画定义 ===== */
-@keyframes cardFadeIn{
-  0%{opacity:0;transform:scale(.9) translateY(20px);}
-  100%{opacity:1;transform:scale(1) translateY(0);}
-}
-@keyframes innerPop{
-  0%{opacity:0;transform:scale(.8);}
-  100%{opacity:1;transform:scale(1);}
-}
-@keyframes float{
-  0%,100%{transform:translateY(0);}
-  50%{transform:translateY(-3px);}
-}
-@keyframes shine{
-  0%{background-position:-60px;}
-  100%{background-position:160px;}
-}
-@keyframes rainbow{
-  0%{background-position:0% 50%;}
-  50%{background-position:100% 50%;}
-  100%{background-position:0% 50%;}
-}
+      /* ================= 3. 主卡片 ================= */
+      .card-ani {
+        width: 480px;
+        height: 380px;
+        background: linear-gradient(135deg, #69bff9, #b96af3, #e9685e, #f2ac3e);
+        border-radius: 18px;
+        padding: 4px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        border: 1px solid #fff4;
+        box-shadow: 0 4px 24px 0 #b96af366;
+        animation: cardFadeIn 0.8s cubic-bezier(0.4, 2, 0.6, 1) 1,
+          float 4s ease-in-out infinite 0.8s;
+        position: relative;
+        z-index: 2;
+      }
+      .card-inner {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 14px;
+        padding: 6px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        animation: innerPop 0.7s cubic-bezier(0.4, 2, 0.6, 1) 1;
+      }
 
-.title::after{
-  content:'';
-  position:absolute;
-  top:0;left:-60px;bottom:0;
-  width:60px;
-  background:linear-gradient(90deg,transparent,rgba(255,255,255,.8),transparent);
-  animation:shine 3s linear infinite 1.5s;
-}
-</style>
+      /* ================= 4. 文字 ================= */
+      .title {
+        font-size: 32px;
+        font-weight: 800;
+        color: #333;
+        margin-bottom: 12px;
+        position: relative;
+        overflow: hidden;
+        height: 40px;
+        white-space: nowrap;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .desc {
+        font-size: 18px;
+        color: #555;
+        line-height: 1.6;
+        max-width: 380px;
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      /* 爆炸粒子 */
+      #explode {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 3;
+      }
+      /* ================= 5. 按钮 ================= */
+      .ani-btn {
+        background-size: 400% 100%;
+        background-image: linear-gradient(
+          45deg,
+          #69bff9,
+          #b96af3,
+          #e9685e,
+          #f2ac3e,
+          #69bff9
+        );
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 10px 28px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: transform 0.25s cubic-bezier(0.4, 2, 0.6, 1),
+          box-shadow 0.25s;
+        box-shadow: 0 2px 8px 0 #b96af377;
+        animation: rainbow 4s ease-in-out infinite;
+      }
+      .ani-btn:hover {
+        transform: scale(1.12) translateY(-3px);
+        box-shadow: 0 6px 18px 0 #b96af3aa;
+      }
 
-<script>
-/* 打字机效果 */
-const text = 'NoNoMi人生滤镜';
-const el = document.getElementById('title');
-let idx = 0;
+      /* ================= 6. 动画定义 ================= */
+      @keyframes cardFadeIn {
+        0% {
+          opacity: 0;
+          transform: scale(0.9) translateY(40px);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+      @keyframes innerPop {
+        0% {
+          opacity: 0;
+          transform: scale(0.8);
+        }
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-8px);
+        }
+      }
+      @keyframes rainbow {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- low-poly 背景 -->
+    <div id="bg-canvas"></div>
 
-function type() {
-  if (idx < text.length) {
-    el.textContent += text.charAt(idx);
-    idx++;
-    setTimeout(type, 180);  
-  }
-}
-type();
-</script>
+    <!-- 主卡片 -->
+    <div class="card-ani">
+      <div class="card-inner">
+        <div class="title" id="title">NoNoMi 人生滤镜</div>
+        <div class="desc" id="desc">
+          给人生开挂的 AI 助手<br />让每一天更智能、更有趣
+        </div>
+        <a
+          href="https://www.xiaohongshu.com/user/profile/620103f00000000021029b87?xsec_token=YBwTrdN0RlEzIjqWDoW7NrR9KQeXLfFH4_64sZWEgYH1g=&xsec_source=app_share&xhsshare=CopyLink&appuid=620103f00000000021029b87&apptime=1753543002&share_id=4ed639c86e0a451dad4f0e5a53ea7688"
+          target="_blank"
+          class="ani-btn"
+          id="btn"
+          >点击Link主创</a
+        >
+      </div>
+    </div>
+
+    <!-- 爆炸粒子层 -->
+    <canvas id="explode"></canvas>
+
+    <!-- ================= 脚本 ================= -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js  "></script>
+    <script>
+      /* ---------- 1. low-poly 背景 ---------- */
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(
+        75,
+        innerWidth / innerHeight,
+        0.1,
+        1000
+      );
+      camera.position.z = 50;
+
+      const renderer = new THREE.WebGLRenderer({
+        canvas: document.createElement("canvas"),
+        alpha: true,
+      });
+      renderer.setSize(innerWidth, innerHeight);
+      document.getElementById("bg-canvas").appendChild(renderer.domElement);
+
+      /* 随机颜色函数 */
+      const randomColor = () =>
+        new THREE.Color(Math.random(), Math.random(), Math.random());
+
+      /* 创建 low-poly 网格 */
+      function createMesh() {
+        const geo = new THREE.IcosahedronGeometry(26, 1);
+        const mat = new THREE.MeshBasicMaterial({
+          color: randomColor(),
+          wireframe: true,
+          transparent: true,
+          opacity: 0.25,
+        });
+        const mesh = new THREE.Mesh(geo, mat);
+        scene.add(mesh);
+        return mesh;
+      }
+      const mesh1 = createMesh();
+      const mesh2 = createMesh();
+      mesh2.rotation.set(
+        Math.random() * Math.PI,
+        Math.random() * Math.PI,
+        Math.random() * Math.PI
+      );
+
+      /* 动画循环 */
+      function animate() {
+        requestAnimationFrame(animate);
+        mesh1.rotation.x += 0.0012;
+        mesh1.rotation.y += 0.0015;
+        mesh2.rotation.x -= 0.0013;
+        mesh2.rotation.y -= 0.0017;
+        renderer.render(scene, camera);
+      }
+      animate();
+
+      /* ---------- 2. 流式文字更新 ---------- */
+      function updateText(elementId, newText) {
+        const element = document.getElementById(elementId);
+        if (element) {
+          element.innerHTML = newText;
+        }
+      }
+
+      // 模拟流式更新
+      setTimeout(() => {
+        updateText(
+          "desc",
+          "Creativity is intelligence having fun.<br>创造力是智慧在玩耍。"
+        );
+      }, 3000);
+
+      setTimeout(() => {
+        updateText(
+          "desc",
+          "Life is not about finding yourself.<br>Life is about creating yourself.<br>生活不是寻找自己，而是创造自己。"
+        );
+      }, 8000);
+
+      setTimeout(() => {
+        updateText("title", "NoNoMi 已激活！");
+        updateText(
+          "desc",
+          "Inspire Creativity • Enrich Life<br>激发创造 • 丰富生活"
+        );
+      }, 12000);
+
+      /* ---------- 3. 按钮点击粒子爆炸 ---------- */
+      const explode = document.getElementById("explode");
+      const ctx = explode.getContext("2d");
+      explode.width = innerWidth;
+      explode.height = innerHeight;
+
+      let particles = [];
+      class Particle {
+        constructor(x, y) {
+          this.x = x;
+          this.y = y;
+          this.vx = (Math.random() - 0.5) * 8;
+          this.vy = (Math.random() - 0.5) * 8;
+          this.life = 60;
+          this.color = `hsl(${Math.random() * 360},100%,70%)`;
+        }
+        update() {
+          this.x += this.vx;
+          this.y += this.vy;
+          this.life--;
+        }
+        draw() {
+          ctx.globalAlpha = this.life / 60;
+          ctx.fillStyle = this.color;
+          ctx.beginPath();
+          ctx.arc(this.x, this.y, 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      document.getElementById("btn").addEventListener("click", (e) => {
+        const rect = e.target.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+        for (let i = 0; i < 60; i++) particles.push(new Particle(x, y));
+
+        // 点击时更新文字
+        updateText("title", "NoNoMi 已激活！");
+        updateText(
+          "desc",
+          "The future belongs to those who believe in the beauty of their dreams.<br>未来属于那些相信梦想之美的人。"
+        );
+      });
+
+      function renderExplode() {
+        ctx.clearRect(0, 0, innerWidth, innerHeight);
+        particles.forEach((p, i) => {
+          p.update();
+          p.draw();
+          if (p.life <= 0) particles.splice(i, 1);
+        });
+        requestAnimationFrame(renderExplode);
+      }
+      renderExplode();
+
+      /* ---------- 4. 窗口自适应 ---------- */
+      addEventListener("resize", () => {
+        camera.aspect = innerWidth / innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(innerWidth, innerHeight);
+        explode.width = innerWidth;
+        explode.height = innerHeight;
+      });
+    </script>
+  </body>
+</html>

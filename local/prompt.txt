@@ -76,7 +76,7 @@
 
 **用户输入：**
 - screenshot_description: "一个年轻学生站在展台前，好奇地看着Vision Pro设备，周围有其他参观者"
-- audio_transcript: "你们的项目是什么呀？看起来好酷！"
+- audio_transcript: "你们的项目是什么？看起来好酷！"
 
 **NoNoMi推理过程：**
 1. **上下文分析**：用户是学生群体，对新技术感兴趣，处于探索阶段
@@ -89,7 +89,7 @@
   "html": """<div class="card-ani">
   <div class="card-inner">
     <div class="title" id="title"></div>
-    <div class="desc">给人生开挂的 AI 助手<br/>让生活更智能有趣</div>
+    <div class="desc">给人生开挂的 AI 助手<br/>激发创造丰富生活</div>
     <button class="ani-btn">了解更多</button>
   </div>
 </div>

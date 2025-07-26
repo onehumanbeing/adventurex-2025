@@ -136,15 +136,19 @@ def reset_status():
       "
     >
       <div style="padding: 40px 40px 0 40px">
-        <span
+        <div
+          id="title"
           style="
             font-size: 56px;
             font-weight: 700;
             color: #98f7b3;
             font-family: sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 70px;
           "
-          >Hello</span
-        >
+        ></div>
       </div>
       <div
         style="
@@ -154,16 +158,21 @@ def reset_status():
           justify-content: center;
         "
       >
-        <span
+        <div
+          id="desc"
           style="
             font-size: 32px;
             font-weight: 700;
             color: #fff;
             font-family: sans-serif;
             text-shadow: 0 2px 8px #000;
+            text-align: center;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
           "
-          >正在为您分析当前场景信息</span
-        >
+        ></div>
       </div>
       <div
         style="
@@ -236,11 +245,54 @@ def reset_status():
             >
           </div>
         </div>
-        <div style="align-self: flex-end"></div>
+        <div style="align-self: flex-end">
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <div style="width: 48px; height: 48px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+              <span style="font-size: 32px;">🎧</span>
+            </div>
+            <div style="color: #fff; font-size: 18px; font-weight: 700; margin-top: 4px; font-family: sans-serif;">NoNomi</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
+<div style="text-align: center; margin-top: 20px;">
+  <a href="https://www.xiaohongshu.com/user/profile/620103f00000000021029b87?xsec_token=YBwTrdN0RlEzIjqWDoW7NrR9KQeXLfFH4_64sZWEgYH1g=&xsec_source=app_share&xhsshare=CopyLink&appuid=620103f00000000021029b87&apptime=1753543002&share_id=4ed639c86e0a451dad4f0e5a53ea7688" target="_blank" style="background: linear-gradient(45deg, #69bff9, #b96af3, #e9685e, #f2ac3e); background-size: 400% 100%; color: white; border: none; border-radius: 8px; padding: 10px 28px; font-size: 16px; cursor: pointer; text-decoration: none; display: inline-block; animation: rainbow 4s ease-in-out infinite; transition: transform 0.25s cubic-bezier(0.4, 2, 0.6, 1), box-shadow 0.25s; box-shadow: 0 2px 8px 0 #b96af377;">Link主创</a>
+</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// 流式文字更新函数
+function updateText(elementId, newText) {
+  const element = document.getElementById(elementId);
+  if (element) {
+    element.innerHTML = newText;
+  }
+}
+
+// 初始化文字
+updateText('title', 'Hello!');
+updateText('desc', '正在为您分析当前场景信息');
+
+// 模拟流式更新
+setTimeout(() => {
+  updateText('desc', 'Creativity is intelligence having fun.<br>创造力是智慧在玩耍。');
+}, 3000);
+
+setTimeout(() => {
+  updateText('desc', 'Life is not about finding yourself.<br>Life is about creating yourself.<br>生活不是寻找自己，而是创造自己。');
+}, 8000);
+
+setTimeout(() => {
+  updateText('title', 'NoNoMi 已激活！');
+  updateText('desc', 'Inspire Creativity • Enrich Life<br>激发创造 • 丰富生活');
+}, 12000);
+</script>
 """,
         "danmu_text": "QAQ",
         "height": 400,
