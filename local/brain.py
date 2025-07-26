@@ -11,10 +11,10 @@ from datetime import datetime
 from generate_audio import t2a_minimax
 
 # 添加LocalTracer导入
-from local_tracer import LocalTracer
+from local_tracer import get_tracer
 
-# 初始化LocalTracer
-tracer = LocalTracer(storage_path="./cache/logs")
+# 获取全局追踪器实例
+tracer = get_tracer("./cache/logs")
 
 # 服务器主机URL，用于构建音频文件的完整路径
 HOST_URL = "https://helped-monthly-alpaca.ngrok-free.app"
@@ -51,14 +51,17 @@ def call_openai_api(messages, thread_id=None):
             model="gpt-4o-mini",
             messages=messages,
             response_format=HtmlView,
-            max_tokens=10000,
-            # 添加回调处理器
-            extra_headers={
-                "langchain_callback_handlers": [tracer],
-                "langchain_metadata": {"thread_id": thread_id}
-            }
+            max_tokens=10000
         )
         response = completion.choices[0].message.parsed
+        
+        # 记录对话到本地日志
+        tracer.log_brain_conversation(
+            thread_id=thread_id,
+            messages=messages,
+            result=response
+        )
+        
         return response
     except Exception as e:
         print(f"OpenAI API调用失败: {e}")
@@ -184,6 +187,15 @@ def periodic_ai_task():
             result = call_openai_api(messages, current_thread_id)
             print("AI HTML结果:", result)
             print(f"Thread ID: {current_thread_id}")
+            
+            # 记录更详细的对话信息
+            tracer.log_brain_conversation(
+                thread_id=current_thread_id,
+                messages=messages,
+                result=result,
+                image_paths=latest_images,
+                audio_content=audio_content
+            )
             
             # 步骤6: 调用语音合成API生成音频
             if result.danmu_text != "":
