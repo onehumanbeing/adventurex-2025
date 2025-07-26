@@ -222,7 +222,117 @@ type();
 **NoNoMi响应：**
 ```json
 {
-"html": "<div style='width:160px;height:120px;background:linear-gradient(135deg,#69BFF9,#B96AF3,#E9685E,#F2AC3E);border-radius:12px;padding:8px;display:flex;flex-direction:column;justify-content:space-between;'><div style='background:rgba(255,255,255,0.95);border-radius:8px;padding:6px;flex:1;display:flex;flex-direction:column;justify-content:space-between;'><div style='text-align:center;margin-bottom:4px;'><div style='font-size:9px;font-weight:bold;color:#333;'>核心功能</div></div><div style='display:flex;flex-direction:column;gap:2px;'><div style='font-size:7px;color:#666;background:#f0f0f0;padding:2px 4px;border-radius:3px;'>🎯 智能场景识别</div><div style='font-size:7px;color:#666;background:#f0f0f0;padding:2px 4px;border-radius:3px;'>💡 个性化建议</div><div style='font-size:7px;color:#666;background:#f0f0f0;padding:2px 4px;border-radius:3px;'>🚀 效率提升助手</div></div><div style='text-align:center;margin-top:4px;'><button style='background:linear-gradient(45deg,#E9685E,#F2AC3E);color:white;border:none;border-radius:4px;padding:2px 6px;font-size:6px;cursor:pointer;'>立即体验</button></div></div></div>",
+"html": "
+  <style>
+    :root{
+      --bg:#0e0e0f;
+      --text:#f5f5f5;
+      --subtle:#a1a1a6;
+      --accent:#d0a144;
+      --surface:#1c1c1e;
+      --line:#2c2c2e;
+    }
+
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{width:100%;height:100%}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+      background:var(--bg);
+      color:var(--text);
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
+
+    .card{
+      width:100%;
+      height:100%;
+      max-width:420px;
+      max-height:480px;
+      background:var(--surface);
+      border:1px solid var(--line);
+      border-radius:24px;
+      padding:48px 40px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .card::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:radial-gradient(circle at 70% 30%,rgba(208,161,68,.08) 0%,transparent 60%);
+      pointer-events:none;
+    }
+
+    h1{
+      font-size:32px;
+      font-weight:600;
+      letter-spacing:.04em;
+      margin-bottom:12px;
+    }
+
+    .subtitle{
+      font-size:15px;
+      color:var(--subtle);
+      line-height:1.7;
+      margin-bottom:40px;
+      max-width:280px;
+    }
+
+    .features{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      width:100%;
+      margin-bottom:40px;
+    }
+
+    .feature{
+      background:transparent;
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:16px 20px;
+      font-size:14px;
+      color:var(--text);
+      transition:border-color .3s ease,transform .25s ease;
+    }
+
+    .feature:hover{
+      border-color:var(--accent);
+      transform:translateY(-2px);
+    }
+
+    .tag{
+      font-size:13px;
+      color:var(--accent);
+      letter-spacing:.05em;
+    }
+  </style>
+<body>
+  <div class="card">
+    <h1>Nonomi</h1>
+    <p class="subtitle">
+      实时场景对话分析<br>
+      零尴尬话题生成<br>
+      捕捉每一次交流可能
+    </p>
+
+    <div class="features">
+      <div class="feature">场景智能识别</div>
+      <div class="feature">话题生成引擎</div>
+      <div class="feature">细节洞察助手</div>
+    </div>
+
+    <div class="tag">让交流充满可能性</div>
+  </div>
+</body>
+",
 "danmu_text": "我可以帮你识别周围环境，提供个性化建议，让生活更高效有趣！想试试看吗？"
 }
 ```
@@ -260,7 +370,102 @@ type();
 **NoNoMi响应：**
 ```json
 {
-"html": "<div style='width:160px;height:120px;background:linear-gradient(135deg,#69BFF9,#B96AF3,#E9685E,#F2AC3E);border-radius:12px;padding:8px;display:flex;flex-direction:column;justify-content:space-between;'><div style='background:rgba(255,255,255,0.95);border-radius:8px;padding:6px;flex:1;display:flex;flex-direction:column;justify-content:space-between;'><div style='text-align:center;margin-bottom:4px;'><div style='font-size:9px;font-weight:bold;color:#333;'>隐私安全</div></div><div style='display:flex;flex-direction:column;gap:2px;'><div style='font-size:7px;color:#666;background:#e8f5e8;padding:2px 4px;border-radius:3px;'>🔒 本地处理</div><div style='font-size:7px;color:#666;background:#e8f5e8;padding:2px 4px;border-radius:3px;'>🛡️ 数据加密</div><div style='font-size:7px;color:#666;background:#e8f5e8;padding:2px 4px;border-radius:3px;'>📋 隐私优先</div></div><div style='text-align:center;margin-top:4px;'><button style='background:linear-gradient(45deg,#69BFF9,#B96AF3);color:white;border:none;border-radius:4px;padding:2px 6px;font-size:6px;cursor:pointer;'>安全承诺</button></div></div></div>",
+"html": "
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: #f5f5f7;
+      color: #1d1d1f;
+      padding: 40px 20px;
+      line-height: 1.7;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 60px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 {
+      font-size: 42px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 40px;
+      letter-spacing: -0.02em;
+    }
+
+    .principle {
+      font-size: 20px;
+      margin-bottom: 30px;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeUp 0.8s forwards;
+      padding-left: 24px;
+      position: relative;
+    }
+
+    .principle::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 12px;
+      width: 8px;
+      height: 8px;
+      background: #007aff;
+      border-radius: 50%;
+    }
+
+    .principle strong {
+      color: #007aff;
+      font-weight: 600;
+    }
+
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* 为每个条款设置不同的动画延迟 */
+    .principle:nth-child(1) { animation-delay: 0.1s; }
+    .principle:nth-child(2) { animation-delay: 0.2s; }
+    .principle:nth-child(3) { animation-delay: 0.3s; }
+    .principle:nth-child(4) { animation-delay: 0.4s; }
+    .principle:nth-child(5) { animation-delay: 0.5s; }
+    .principle:nth-child(6) { animation-delay: 0.6s; }
+    .principle:nth-child(7) { animation-delay: 0.7s; }
+  </style>
+<body>
+  <div class="container">
+    <h1>用户隐私政策</h1>
+    <p style="font-size: 22px; margin-bottom: 40px; text-align: center; color: #515154;">
+      我们深知您的个人信息安全对您至关重要。作为一家以用户隐私为核心的 AI 产品提供商，我们承诺遵循以下隐私保护原则，确保您的数据始终受到最严格的保护：
+    </p>
+
+    <div class="principle"><strong>1. 最小化数据收集：</strong>我们仅收集提供服务所必需的最少量数据。默认情况下，我们不会收集、存储或共享您的敏感信息（如身份信息、个人内容或行为数据），除非出于提供核心功能的必要，并且在您明确授权的前提下。</div>
+
+    <div class="principle"><strong>2. 数据用途透明：</strong>所有数据收集和使用的目的、方式、存储期限都会通过简明清晰的界面告知您。我们不会将您的个人数据用于广告推送、营销或任何未经您同意的用途。</div>
+
+    <div class="principle"><strong>3. 用户数据自主权：</strong>您可以随时查看、下载或删除我们存储的任何与您相关的数据。对于自动化处理（如 AI 模型训练等）的数据使用，您拥有明确的“选择加入”或“选择退出”权利，且不会影响您继续使用我们的基础服务。</div>
+
+    <div class="principle"><strong>4. 本地化处理优先：</strong>能在本地设备完成的数据处理（如语音识别、文本生成等），我们优先在本地执行，避免数据上传至服务器，进一步降低数据泄露风险。</div>
+
+    <div class="principle"><strong>5. 端到端加密与安全存储：</strong>对于需要传输和存储的数据，我们采用行业领先的端到端加密技术，确保数据在传输、存储和处理全链路中都具备最高级别的安全防护。</div>
+
+    <div class="principle"><strong>6. 不向第三方出售数据：</strong>我们承诺绝不向任何第三方出售您的个人数据。除非基于法律要求，或您主动授权同意，我们不会向任何无关方披露您的数据。</div>
+
+    <div class="principle"><strong>7. 隐私影响评估与持续改进：</strong>在推出新功能前，我们将进行全面的隐私影响评估，确保不会带来额外的隐私风险。同时，我们将持续优化隐私保护措施，保持政策与最新法规和最佳实践同步。</div>
+  </div>
+</body>",
 "danmu_text": "完全不用担心！我们采用本地处理，你的隐私数据永远不会离开你的设备！"
 }
 ```

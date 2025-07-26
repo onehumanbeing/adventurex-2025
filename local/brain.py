@@ -98,8 +98,7 @@ def reset_status():
         "timestamp": int(time.time()),
         "html": """
     <style>
-      /* ================= 1. 全局 ================= */
-      * {
+      /* ================= 1. 全局 ================= */ 
         margin: 0;
         padding: 0;
         box-sizing: border-box;
@@ -369,8 +368,7 @@ def reset_status():
         }
       }
     </style>
-  </head>
-  <body>
+    <body>
     <!-- low-poly 背景 -->
     <div id="bg-canvas"></div>
 
