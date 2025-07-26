@@ -164,6 +164,13 @@ def periodic_ai_task():
                 
                 if not finished_result.result:
                     print("❌音频内容不需要触发AI回复，跳过本次处理")
+                    # 检查如果audio.txt的行数大于10行，则清空
+                    if os.path.exists(AUDIO_TXT_PATH):
+                        with open(AUDIO_TXT_PATH, "r", encoding="utf-8") as f:
+                            lines = f.readlines()
+                            if len(lines) > 10:
+                                with open(AUDIO_TXT_PATH, "w", encoding="utf-8") as f:
+                                    f.write("")
                     time.sleep(3)
                     continue
                 print("✅音频内容需要触发AI回复，继续处理")
